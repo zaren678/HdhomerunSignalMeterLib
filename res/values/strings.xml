@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">HdhomerunSignalMeterLib</string>
+    <string name="Refresh_Devices">Refresh Devices</string>
+    <string name="Settings">Settings</string>
+    <string name="About">About</string><string name="channel_label">Channel</string><string name="signal_strength_label">Sig Strength</string><string name="snr_quality_label">SNR Quality</string><string name="sym_quality_label">Sym Quality</string><string name="data_rate_label">Data Rate</string><string name="network_rate_label">Net Rate</string><string name="device_label">Device:</string><string name="none_label">None</string>
+    <string name="reset_device">Reset Device</string>
+    <string name="reset_cablecard">Reset Cablecard</string>
+
+</resources>

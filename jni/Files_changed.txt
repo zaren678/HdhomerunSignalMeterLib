@@ -1,0 +1,11 @@
+hdhomerun.h --> added android logging
+hdhomerun_channels.c --> moved some struct defs
+hdhomerun_channels.h --> moved some struct defs
+
+hdhomerun_debug.c --> pipe debug to android debugger
+
+hdhomerun_discover.c --> added some debug
+hdhomerun_discover.h --> declare new fun ipAddressToString
+hdhomerun_os_posix.h --> remove typedef
+
+hdhomerun_sock_posix.c --> added debug
