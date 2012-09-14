@@ -79,11 +79,11 @@ public class DeviceController implements Serializable
                   HDHomerunLogger.e("Device Thread halted due to an error " + t);
                } 
             }
-         }, "Device");
+         }, "Device: " + mDevice.getDeviceName() );
       mDeviceThread.start(); 
    }
 
-   public void initialize()
+   public void initialize( final boolean aReportInitialStatus )
    {
       mDeviceHandler.post(new Runnable()
       {
@@ -108,7 +108,7 @@ public class DeviceController implements Serializable
             //had to make this variable because setChannelMapIdx had to be final to be used
             //in the Runnable below, but if it was final I couldn't set it in the loop above
             int theChannelMapIdx = theSetChannelMapIdx;
-            
+                        
             notifyChannelMapListChanged( theChannelMaps );            
             
             DeviceResponse theResponse = new DeviceResponse( DeviceResponse.SUCCESS );
@@ -116,13 +116,20 @@ public class DeviceController implements Serializable
             {
                HDHomerunLogger.d("Setting initial channelmap spinner to " + theChannelMapIdx + " " + theCurrentChannelMap);
                mCurrentChannelMap = theCurrentChannelMap;
-               notifyChannelMapChanged( theResponse, theCurrentChannelMap );
+               
+               if( aReportInitialStatus )
+               {
+                  notifyChannelMapChanged( theResponse, theCurrentChannelMap );
+               }
             }
             else
             {
                HDHomerunLogger.d("No initial channelmap");
                mCurrentChannelMap = theChannelMaps[ 0 ];
-               notifyChannelMapChanged( theResponse, theChannelMaps[ 0 ] );
+               if( aReportInitialStatus )
+               {
+                  notifyChannelMapChanged( theResponse, theChannelMaps[ 0 ] );
+               }
             }
             
             final ProgramsList thePrograms = new ProgramsList();
@@ -137,8 +144,8 @@ public class DeviceController implements Serializable
 
             notifyObserversProgramListChanged( thePrograms, theInitialChannel );
             
-            if(theIntialProgram > 0)
-            {
+            if( theIntialProgram > 0 && aReportInitialStatus )
+            {               
                notifyObserversProgramChanged( theResponse, thePrograms.get( theIntialProgram ) );
             }
             

@@ -1,7 +1,6 @@
 package com.zaren.HdhomerunSignalMeterLib.util;
 
 import android.app.Activity;
-import android.content.Context;
 import android.widget.Toast;
 
 public class ErrorHandler
