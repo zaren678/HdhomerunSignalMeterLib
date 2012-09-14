@@ -74,9 +74,9 @@ public class Utils
       }
    }
    
-   public static int getChannelNumberFromTunerStatusChannel( HdhomerunDevice aDevice, String aChannel, String aLockStr )
+   public static int getChannelNumberFromTunerStatusChannel( HdhomerunDevice aDevice, String aChannel )
    {
-      HDHomerunLogger.v( "getChannelNumberFromTunerStatusChannel: "+aChannel + " " + aLockStr );
+      HDHomerunLogger.v( "getChannelNumberFromTunerStatusChannel: "+aChannel );
       if( aChannel.equals( "none" ) )
       {
          return -1;

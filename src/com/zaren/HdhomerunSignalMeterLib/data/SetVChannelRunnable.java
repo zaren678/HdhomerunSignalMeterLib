@@ -80,7 +80,7 @@ public class SetVChannelRunnable implements Runnable
       
       int theFinalProgramPosition = theProgramPosition;
 
-      mDeviceController.notifyObserversTunerStatus( theResponse, theTunerStatus );
+      mDeviceController.notifyObserversTunerStatus( theResponse, theTunerStatus, null );
       
       final int theChannel = mDevice.getCurrentChannel();
       mDeviceController.notifyObserversProgramListChanged( thePrograms, theChannel );

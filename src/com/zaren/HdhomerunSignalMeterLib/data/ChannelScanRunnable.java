@@ -146,7 +146,7 @@ public class ChannelScanRunnable implements Runnable
             theResponse.setStatus( mDevice.waitForLock(theTunerStatus) );            
             HDHomerunLogger.d("Lock Status " + theResponse.getStatus() + " lock_supported " + theTunerStatus.lockSupported);
             
-            mCntrl.notifyObserversTunerStatus( theResponse, theTunerStatus );            
+            mCntrl.notifyObserversTunerStatus( theResponse, theTunerStatus, null );            
             
             if( theTunerStatus.lockSupported )
             {

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import android.database.Observable;
 
 import com.zaren.HdhomerunSignalMeterLib.data.ChannelScanProgram;
+import com.zaren.HdhomerunSignalMeterLib.data.CurrentChannelAndProgram;
 import com.zaren.HdhomerunSignalMeterLib.data.DeviceController;
 import com.zaren.HdhomerunSignalMeterLib.data.DeviceResponse;
 import com.zaren.HdhomerunSignalMeterLib.data.ProgramsList;
@@ -120,9 +121,9 @@ public class DeviceControllerEvents
       return mTunerStatusChanged;
    }
    
-   public void notifyTunerStatusChanged( DeviceResponse aResponse, DeviceController aDeviceController, TunerStatus aTunerStatus )
+   public void notifyTunerStatusChanged( DeviceResponse aResponse, DeviceController aDeviceController, TunerStatus aTunerStatus, CurrentChannelAndProgram aCurrentChannel )
    {
-      mTunerStatusChanged.raiseEvent( aResponse, aDeviceController, aTunerStatus );
+      mTunerStatusChanged.raiseEvent( aResponse, aDeviceController, aTunerStatus, aCurrentChannel );
    }
    
    private class ChannelMapObservable extends Observable< ChannelMapObserverInt >
@@ -160,11 +161,11 @@ public class DeviceControllerEvents
    
    private class TunerStatusObserver extends Observable< TunerStatusObserverInt >
    {
-      public void raiseEvent( DeviceResponse aResponse, DeviceController aDeviceController, TunerStatus aTunerStatus )
+      public void raiseEvent( DeviceResponse aResponse, DeviceController aDeviceController, TunerStatus aTunerStatus, CurrentChannelAndProgram aCurrentChannel )
       {
          for( TunerStatusObserverInt theObserver : mObservers )
          {
-            theObserver.tunerStatusChanged(aResponse, aDeviceController, aTunerStatus);
+            theObserver.tunerStatusChanged(aResponse, aDeviceController, aTunerStatus, aCurrentChannel);
          }
       }
    }

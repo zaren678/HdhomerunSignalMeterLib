@@ -136,7 +136,7 @@ public class HdhomerunDevice implements Serializable
    {
       int theRetVal = JNIgetTunerChannel( cPointer, aChannel );
       
-      HDHomerunLogger.d("getTunerChannel: return val " + theRetVal + " program: " + aChannel.getString());
+      HDHomerunLogger.d("getTunerChannel: return val " + theRetVal + " channel: " + aChannel.getString());
       
       return theRetVal;
    }
@@ -228,7 +228,7 @@ public class HdhomerunDevice implements Serializable
       {
          String str = strings.nextToken();
          
-         HDHomerunLogger.d("Processing: " + str);
+         //HDHomerunLogger.d("Processing: " + str);
          
          Matcher m = programPattern3.matcher(str);
       

@@ -325,12 +325,37 @@ public class DeviceController implements Serializable
          final DeviceResponse theResponse = new DeviceResponse( mTunerStatus.returnStatus );
          theResponse.putString(DeviceResponse.KEY_ACTION, "Getting Tuner Status");
 
+         JniString theChannel = new JniString();
+         theResponse.setStatus( mDevice.getTunerChannel( theChannel ) );
+         
+         final CurrentChannelAndProgram theCurrentChannel = new CurrentChannelAndProgram();
+         if( theResponse.getStatus() == DeviceResponse.SUCCESS )
+         {
+            String theRetChannel = theChannel.getString();
+            theCurrentChannel.setChannel( theRetChannel );
+            
+            JniString theProgram = new JniString();
+            theResponse.setStatus( mDevice.getTunerProgram( theProgram ) );
+            
+            if( theResponse.getStatus() == DeviceResponse.SUCCESS )
+            {
+               int theRetProgram = Integer.parseInt( theProgram.getString() );
+               theCurrentChannel.setProgramNum( theRetProgram );
+               
+               ProgramsList thePrograms = new ProgramsList();
+               mDevice.getTunerStreamInfo( thePrograms );
+               
+               theCurrentChannel.setPrograms( thePrograms );
+            }                        
+         }
+
+         
          mUiHandler.post(new Runnable()
          {
             @Override
             public void run()
-            {
-               notifyObserversTunerStatus( theResponse, mTunerStatus );
+            {               
+               notifyObserversTunerStatus( theResponse, mTunerStatus, theCurrentChannel );
             }
          });
          
@@ -370,7 +395,7 @@ public class DeviceController implements Serializable
          mDevice.updateTunerStatus(mTunerStatus);
          
          
-         int channel = Utils.getChannelNumberFromTunerStatusChannel(mDevice, mTunerStatus.channel, mTunerStatus.lockStr);
+         int channel = Utils.getChannelNumberFromTunerStatusChannel(mDevice, mTunerStatus.channel);
          
          DeviceResponse theResponse = new DeviceResponse( DeviceResponse.SUCCESS );
          notifyObserversChannelChanged( theResponse, channel );
@@ -730,7 +755,7 @@ public class DeviceController implements Serializable
       aResponse.putBoolean( DeviceResponse.KEY_LOCKED, true );      
    }
    
-   public void notifyObserversTunerStatus( final DeviceResponse aResponse, final TunerStatus aTunerStatus )
+   public void notifyObserversTunerStatus( final DeviceResponse aResponse, final TunerStatus aTunerStatus, final CurrentChannelAndProgram aCurrentChannel )
    {
       if( !aTunerStatus.equals( mPreviousTunerStatus ) )
       {
@@ -739,7 +764,7 @@ public class DeviceController implements Serializable
             @Override
             public void run()
             {
-               mEvents.notifyTunerStatusChanged(aResponse, DeviceController.this, aTunerStatus);       
+               mEvents.notifyTunerStatusChanged(aResponse, DeviceController.this, aTunerStatus, aCurrentChannel);       
             }
          });               
       }

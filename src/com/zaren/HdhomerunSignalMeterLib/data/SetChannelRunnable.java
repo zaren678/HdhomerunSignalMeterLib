@@ -67,7 +67,7 @@ public class SetChannelRunnable implements Runnable
          }
                   
          mDeviceController.notifyChannelLocked( theTunerStatus );
-         mDeviceController.notifyObserversTunerStatus( theResponse, theTunerStatus );
+         mDeviceController.notifyObserversTunerStatus( theResponse, theTunerStatus, null );
          
          mDevice.getTunerStreamInfo(thePrograms);            
          mDeviceController.notifyObserversProgramListChanged( thePrograms, mChannel );                                                                                      
