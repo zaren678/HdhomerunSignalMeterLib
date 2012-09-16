@@ -339,7 +339,17 @@ public class DeviceController implements Serializable
             
             if( theResponse.getStatus() == DeviceResponse.SUCCESS )
             {
-               int theRetProgram = Integer.parseInt( theProgram.getString() );
+               int theRetProgram = 0;
+               
+               try
+               {
+                  theRetProgram = Integer.parseInt( theProgram.getString() );
+               }
+               catch( NumberFormatException e )
+               {
+                  HDHomerunLogger.d( "Failed to parse program num from string " + theProgram );
+               }
+               
                theCurrentChannel.setProgramNum( theRetProgram );
                
                ProgramsList thePrograms = new ProgramsList();
