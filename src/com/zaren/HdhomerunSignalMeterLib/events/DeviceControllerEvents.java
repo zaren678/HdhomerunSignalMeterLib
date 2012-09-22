@@ -126,7 +126,7 @@ public class DeviceControllerEvents
       mTunerStatusChanged.raiseEvent( aResponse, aDeviceController, aTunerStatus, aCurrentChannel );
    }
    
-   private class ChannelMapObservable extends Observable< ChannelMapObserverInt >
+   private class ChannelMapObservable extends ObservableWithCheck< ChannelMapObserverInt >
    {
       public void raiseEvent( DeviceResponse aResponse, DeviceController aDeviceController, String aNewChannelMap )
       {
@@ -137,7 +137,7 @@ public class DeviceControllerEvents
       }
    }
    
-   private class ChannelMapListObservable extends Observable< ChannelMapListChangedObserverInt >
+   private class ChannelMapListObservable extends ObservableWithCheck< ChannelMapListChangedObserverInt >
    {
       public void raiseEvent( DeviceController aDeviceController, String[] aChannelMapList )
       {
@@ -148,7 +148,7 @@ public class DeviceControllerEvents
       }
    }
    
-   private class ChannelChangedObserver extends Observable< ChannelChangedObserverInt >
+   private class ChannelChangedObserver extends ObservableWithCheck< ChannelChangedObserverInt >
    {
       public void raiseEvent( DeviceResponse aResponse, DeviceController aDeviceController, int aNewChannel )
       {
@@ -159,7 +159,7 @@ public class DeviceControllerEvents
       }
    }
    
-   private class TunerStatusObserver extends Observable< TunerStatusObserverInt >
+   private class TunerStatusObserver extends ObservableWithCheck< TunerStatusObserverInt >
    {
       public void raiseEvent( DeviceResponse aResponse, DeviceController aDeviceController, TunerStatus aTunerStatus, CurrentChannelAndProgram aCurrentChannel )
       {
@@ -170,7 +170,7 @@ public class DeviceControllerEvents
       }
    }
    
-   private class ProgramObserver extends Observable< ProgramObserverInt >
+   private class ProgramObserver extends ObservableWithCheck< ProgramObserverInt >
    {
       public void raiseEvent( DeviceResponse aResponse, DeviceController aDeviceController, ChannelScanProgram aProgram )
       {
@@ -184,7 +184,7 @@ public class DeviceControllerEvents
       }
    }
    
-   private class ProgramListObserver extends Observable< ProgramListObserverInt >
+   private class ProgramListObserver extends ObservableWithCheck< ProgramListObserverInt >
    {
       public void raiseEvent( DeviceController aDeviceController, ProgramsList thePrograms, int aChannel )
       {
@@ -195,7 +195,7 @@ public class DeviceControllerEvents
       }
    }
    
-   private class ChannelScanCompleteObserver extends Observable< ChannelScanCompleteObserverInt >
+   private class ChannelScanCompleteObserver extends ObservableWithCheck< ChannelScanCompleteObserverInt >
    {             
       public void raiseEvent( DeviceResponse aResponse, DeviceController aDeviceController )
       {
@@ -209,7 +209,7 @@ public class DeviceControllerEvents
       }
    }
    
-   private class ChannelLockedObserver extends Observable< ChannelLockedObserverInt >
+   private class ChannelLockedObserver extends ObservableWithCheck< ChannelLockedObserverInt >
    {
       public void raiseEvent( DeviceController aDeviceController, TunerStatus aTunerStatus )
       {

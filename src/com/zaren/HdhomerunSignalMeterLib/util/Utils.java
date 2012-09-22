@@ -86,23 +86,30 @@ public class Utils
          String[] splitString = aChannel.split( ":" );
          if( splitString.length > 1 )
          {
-            int theChannelInt = Integer.parseInt( splitString[1] );
-            if( theChannelInt > 1000 )
+            try
             {
-               //this must be a frequency value
-               theChannelInt = aDevice.frequencyToChannelNumber( theChannelInt );
-               
-               if( theChannelInt == 0 )
+               int theChannelInt = Integer.parseInt( splitString[1] );
+               if( theChannelInt > 1000 )
                {
-                  //for some reason we couldn't match up the frequency to channel number, just return the frequency
-                  return -1;
+                  //this must be a frequency value
+                  theChannelInt = aDevice.frequencyToChannelNumber( theChannelInt );
+                  
+                  if( theChannelInt == 0 )
+                  {
+                     //for some reason we couldn't match up the frequency to channel number, just return the frequency
+                     return -1;
+                  }
+                  
+                  return theChannelInt;
                }
-               
-               return theChannelInt;
+               else
+               {
+                  return theChannelInt;
+               }
             }
-            else
+            catch( NumberFormatException e )
             {
-               return theChannelInt;
+               return -1;
             }
          }
          else
