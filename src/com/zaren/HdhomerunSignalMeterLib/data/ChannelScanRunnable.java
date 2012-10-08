@@ -10,6 +10,7 @@ public class ChannelScanRunnable implements Runnable
    private DeviceController mCntrl;
    private ChannelList mChannelList;
    private int mStartingChannel;
+   private volatile boolean mFullChannelScan = false;
    
    /**
     * @param aIsForward
@@ -35,6 +36,20 @@ public class ChannelScanRunnable implements Runnable
       mCntrl = aCntrl;
       mChannelList = aChannelList;
       mStartingChannel = aStartingChannel;
+      
+      mIsRunning = true;
+   }
+   
+   public ChannelScanRunnable( DeviceController aCntrl, ChannelList aChannelList )
+   {
+      super();
+      mIsForward = true;
+      mDevice = aCntrl.getDevice();
+      mCntrl = aCntrl;
+      mChannelList = aChannelList;
+      mStartingChannel = aChannelList.getMinNumber() - 1;
+      
+      mFullChannelScan = true;
       
       mIsRunning = true;
    }
@@ -150,7 +165,7 @@ public class ChannelScanRunnable implements Runnable
             
             if( theTunerStatus.lockSupported )
             {
-               mCntrl.setProgressBarBusy( false );
+               
                
                mCntrl.notifyChannelLocked( theTunerStatus );
                
@@ -159,8 +174,13 @@ public class ChannelScanRunnable implements Runnable
                
                mCntrl.notifyObserversProgramListChanged( thePrograms, theCurrentChannel );
                
-               mIsRunning = false;
-               return;                   
+               if( !mFullChannelScan )
+               {
+                  mIsRunning = false;
+                  return;
+               }
+               
+                                
             }
             
             if( checkForEnd( theCurrentChannel ) )

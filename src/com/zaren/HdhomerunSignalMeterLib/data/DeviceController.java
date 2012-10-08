@@ -539,6 +539,19 @@ public class DeviceController implements Serializable
       mDeviceHandler.post(mChannelScanTask);
    }
    
+   public void fullChannelScan()
+   {
+      if( mChannelScanTask != null &&
+          mChannelScanTask.isRunning() )
+      {
+         return;
+      }
+      
+      setProgressBarBusy( true );
+      mChannelScanTask = new ChannelScanRunnable( this, mChannelList );
+      mDeviceHandler.post(mChannelScanTask);
+   }
+   
    public void channelScanBackward()
    {
       channelScanBackward( -1 );
