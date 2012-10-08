@@ -3,6 +3,7 @@ package com.zaren.HdhomerunSignalMeterLib.data;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import android.util.SparseArray;
 
@@ -23,6 +24,12 @@ public class ProgramsList extends SparseArray< ChannelScanProgram > implements I
          thePrograms.add( valueAt( i ) );
       }
       
+      return thePrograms;
+   }
+   
+   public List< ChannelScanProgram > toList()
+   {
+      ArrayList< ChannelScanProgram > thePrograms = new ArrayList<ChannelScanProgram>( values() ); 
       return thePrograms;
    }
 }
