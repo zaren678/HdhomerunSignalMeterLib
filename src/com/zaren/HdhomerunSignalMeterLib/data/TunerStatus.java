@@ -1,7 +1,13 @@
 package com.zaren.HdhomerunSignalMeterLib.data;
 
-public class TunerStatus implements Cloneable
+import java.io.Serializable;
+
+public class TunerStatus implements Cloneable, Serializable
 {   
+   /**
+    * 
+    */
+   private static final long serialVersionUID = 6141682380370825771L;
    public String channel;
    public String lockStr;
    public boolean signalPresent;
