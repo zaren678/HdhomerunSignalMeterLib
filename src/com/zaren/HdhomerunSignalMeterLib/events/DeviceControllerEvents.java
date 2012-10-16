@@ -1,5 +1,6 @@
 package com.zaren.HdhomerunSignalMeterLib.events;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import android.database.Observable;
@@ -11,8 +12,12 @@ import com.zaren.HdhomerunSignalMeterLib.data.DeviceResponse;
 import com.zaren.HdhomerunSignalMeterLib.data.ProgramsList;
 import com.zaren.HdhomerunSignalMeterLib.data.TunerStatus;
 
-public class DeviceControllerEvents
+public class DeviceControllerEvents implements Serializable
 {
+   /**
+    * 
+    */
+   private static final long serialVersionUID = -5863522079275342489L;
    private ChannelMapObservable mChannelMapChanged;
    private ChannelMapListObservable mChannelMapListChanged;
    private ChannelChangedObserver mChannelChanged;
@@ -126,8 +131,13 @@ public class DeviceControllerEvents
       mTunerStatusChanged.raiseEvent( aResponse, aDeviceController, aTunerStatus, aCurrentChannel );
    }
    
-   private class ChannelMapObservable extends ObservableWithCheck< ChannelMapObserverInt >
+   private class ChannelMapObservable extends ObservableWithCheck< ChannelMapObserverInt > implements Serializable
    {
+      /**
+       * 
+       */
+      private static final long serialVersionUID = -3987052107515060351L;
+
       public void raiseEvent( DeviceResponse aResponse, DeviceController aDeviceController, String aNewChannelMap )
       {
          for( ChannelMapObserverInt theObserver : mObservers )
@@ -137,8 +147,13 @@ public class DeviceControllerEvents
       }
    }
    
-   private class ChannelMapListObservable extends ObservableWithCheck< ChannelMapListChangedObserverInt >
+   private class ChannelMapListObservable extends ObservableWithCheck< ChannelMapListChangedObserverInt > implements Serializable
    {
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 551693413894409030L;
+
       public void raiseEvent( DeviceController aDeviceController, String[] aChannelMapList )
       {
          for( ChannelMapListChangedObserverInt theObserver : mObservers )
@@ -148,8 +163,13 @@ public class DeviceControllerEvents
       }
    }
    
-   private class ChannelChangedObserver extends ObservableWithCheck< ChannelChangedObserverInt >
+   private class ChannelChangedObserver extends ObservableWithCheck< ChannelChangedObserverInt > implements Serializable
    {
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 5389849705930695344L;
+
       public void raiseEvent( DeviceResponse aResponse, DeviceController aDeviceController, int aNewChannel )
       {
          for( ChannelChangedObserverInt theObserver : mObservers )
@@ -159,8 +179,13 @@ public class DeviceControllerEvents
       }
    }
    
-   private class TunerStatusObserver extends ObservableWithCheck< TunerStatusObserverInt >
+   private class TunerStatusObserver extends ObservableWithCheck< TunerStatusObserverInt > implements Serializable
    {
+      /**
+       * 
+       */
+      private static final long serialVersionUID = -1300424500043927692L;
+
       public void raiseEvent( DeviceResponse aResponse, DeviceController aDeviceController, TunerStatus aTunerStatus, CurrentChannelAndProgram aCurrentChannel )
       {
          for( TunerStatusObserverInt theObserver : mObservers )
@@ -170,8 +195,13 @@ public class DeviceControllerEvents
       }
    }
    
-   private class ProgramObserver extends ObservableWithCheck< ProgramObserverInt >
+   private class ProgramObserver extends ObservableWithCheck< ProgramObserverInt > implements Serializable
    {
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 5304623928738157566L;
+
       public void raiseEvent( DeviceResponse aResponse, DeviceController aDeviceController, ChannelScanProgram aProgram )
       {
          //workaround for concurrent exception while hitting play, the handler of this observer unregisters itself...
@@ -184,8 +214,13 @@ public class DeviceControllerEvents
       }
    }
    
-   private class ProgramListObserver extends ObservableWithCheck< ProgramListObserverInt >
+   private class ProgramListObserver extends ObservableWithCheck< ProgramListObserverInt > implements Serializable
    {
+      /**
+       * 
+       */
+      private static final long serialVersionUID = -7860123203909553349L;
+
       public void raiseEvent( DeviceController aDeviceController, ProgramsList thePrograms, int aChannel )
       {
          for( ProgramListObserverInt theObserver : mObservers )
@@ -195,8 +230,13 @@ public class DeviceControllerEvents
       }
    }
    
-   private class ChannelScanCompleteObserver extends ObservableWithCheck< ChannelScanCompleteObserverInt >
+   private class ChannelScanCompleteObserver extends ObservableWithCheck< ChannelScanCompleteObserverInt > implements Serializable
    {             
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 2041382778132054012L;
+
       public void raiseEvent( DeviceResponse aResponse, DeviceController aDeviceController )
       {
          //workaround for concurrent exception while hitting play, the handler of this observer unregisters itself...
@@ -209,8 +249,13 @@ public class DeviceControllerEvents
       }
    }
    
-   private class ChannelLockedObserver extends ObservableWithCheck< ChannelLockedObserverInt >
+   private class ChannelLockedObserver extends ObservableWithCheck< ChannelLockedObserverInt > implements Serializable
    {
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 8813597796333680555L;
+
       public void raiseEvent( DeviceController aDeviceController, TunerStatus aTunerStatus )
       {
          for( ChannelLockedObserverInt theObserver : mObservers )
