@@ -237,22 +237,29 @@ public class HdhomerunDevice implements Serializable
             
             ChannelScanProgram prog = new ChannelScanProgram();
             
-            if(m.group(3) != null)
+            try
             {
-               prog.setAllFields(str, Integer.parseInt(m.group(1)), 
-                                      Integer.parseInt(m.group(2)),
-                                      Integer.parseInt(m.group(3)),
-                                      0, m.group(4));
+               if(m.group(3) != null)
+               {
+                  prog.setAllFields(str, Integer.parseInt(m.group(1)), 
+                                         Integer.parseInt(m.group(2)),
+                                         Integer.parseInt(m.group(3)),
+                                         0, m.group(4));
+               }
+               else
+               {
+                  prog.setAllFields(str, Integer.parseInt(m.group(1)),
+                                         Integer.parseInt(m.group(2)),
+                                         0,
+                                         0, m.group(4));
+               }
+               
+               thePrograms.put( prog.programNumber, prog );
             }
-            else
+            catch( NumberFormatException e )
             {
-               prog.setAllFields(str, Integer.parseInt(m.group(1)),
-                                      Integer.parseInt(m.group(2)),
-                                      0,
-                                      0, m.group(4));
+               //just catch and move on... must've got a bad program
             }
-            
-            thePrograms.put( prog.programNumber, prog );
          }
       }
    }
@@ -608,7 +615,7 @@ public class HdhomerunDevice implements Serializable
    {
       int retVal =  JNIgetTunerProgram(cPointer, program);
       
-      HDHomerunLogger.d("getTunerProgram: return val " + retVal + " program: " + program.getString());
+      //HDHomerunLogger.d("getTunerProgram: return val " + retVal + " program: " + program.getString());
       
       return retVal;
    }
