@@ -598,19 +598,16 @@ public class DeviceController implements Serializable
       mDeviceHandler.post(mChannelScanTask);
    }
 
-   public void pause()
+   public void stopTunerStatusUpdates()
    {
-      HDHomerunLogger.d("Control: pause");
       mTunerStatusTaskRunning = false;
    }
    
-   public void resume()
+   public boolean isTunerStatusUpdatesRunning()
    {
-      HDHomerunLogger.d("Control: resume");
-      mTunerStatusTaskRunning = true;
-      mDeviceHandler.post( new TunerStatusRunnable() );
+      return mTunerStatusTaskRunning;
    }
-
+   
    public void destroyDevice()
    {
       if(mDevice != null)
