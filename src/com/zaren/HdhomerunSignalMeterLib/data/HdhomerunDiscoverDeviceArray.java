@@ -37,6 +37,20 @@ public class HdhomerunDiscoverDeviceArray
    {
       return mDiscoverDeviceArray.size();
    }
+   
+   public int find( String aDeviceName ) throws DeviceNotFoundException
+   {
+      for( int i=0; i < mDiscoverDeviceArray.size(); i++ )
+      {
+         HdhomerunDiscoverDevice theDevice = mDiscoverDeviceArray.get( i );
+         if( theDevice.getName().equals( aDeviceName ) )
+         {
+            return i;
+         }
+      }
+      
+      throw new DeviceNotFoundException( "Device " + aDeviceName + " not in discovery list" );
+   }
 
    /**
     * @return the discoverDeviceList
