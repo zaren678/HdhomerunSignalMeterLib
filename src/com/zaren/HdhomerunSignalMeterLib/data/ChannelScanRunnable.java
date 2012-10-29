@@ -164,15 +164,24 @@ public class ChannelScanRunnable implements Runnable
             mCntrl.notifyObserversTunerStatus( theResponse, theTunerStatus, null );            
             
             if( theTunerStatus.lockSupported )
-            {
-               
-               
+            {                              
                mCntrl.notifyChannelLocked( theTunerStatus );
                
                thePrograms.clear();
                mDevice.getTunerStreamInfo( thePrograms );
                
-               mCntrl.notifyObserversProgramListChanged( thePrograms, theCurrentChannel );
+               boolean isSubscribed = true;
+               if( mDevice.getDeviceType().equals( HdhomerunDevice.DEVICE_CABLECARD ) )
+               {
+                  TunerVStatus theVStatus = mDevice.getTunerVStatus();
+                  
+                  if( theVStatus.returnStatus == DeviceResponse.SUCCESS )
+                  {
+                     isSubscribed = !theVStatus.notSubscribed;
+                  }
+               }
+               
+               mCntrl.notifyObserversProgramListChanged( thePrograms, theCurrentChannel, isSubscribed );
                
                if( !mFullChannelScan )
                {

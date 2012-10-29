@@ -288,9 +288,6 @@ public class HdhomerunDevice implements Serializable
    public TunerVStatus getTunerVStatus()
    {
       TunerVStatus tunerVStatus = JNIgetTunerVStatus(cPointer);
-
-      checkForError(tunerVStatus.returnStatus, "GetTunerVStatus");
-
       return tunerVStatus;
    }
    

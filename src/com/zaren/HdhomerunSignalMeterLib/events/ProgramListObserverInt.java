@@ -5,5 +5,5 @@ import com.zaren.HdhomerunSignalMeterLib.data.ProgramsList;
 
 public interface ProgramListObserverInt
 {
-   void programListChanged( DeviceController aDeviceController, ProgramsList aPrograms, int aChannel );
+   void programListChanged( DeviceController aDeviceController, ProgramsList aPrograms, int aChannel, boolean theIsSubscribed );
 }
