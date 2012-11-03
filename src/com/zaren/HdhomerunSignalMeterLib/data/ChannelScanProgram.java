@@ -11,6 +11,7 @@ public class ChannelScanProgram implements Serializable
    public int virtualMinor;
    public int type;
    public String name;
+   boolean mIsSubscribed = true;
    
    public ChannelScanProgram()
    {
@@ -30,6 +31,23 @@ public class ChannelScanProgram implements Serializable
       virtualMinor = aVirtualMinor;
       type = aType;
       name = aName;
+   }
+   
+   public ChannelScanProgram( String aProgramString, 
+         int aProgramNumber,
+         int aVirtualMajor, 
+         int aVirtualMinor,
+         int aType,
+         String aName,
+         boolean aIsSubscribed )
+   {      
+      programString = aProgramString;
+      programNumber = aProgramNumber;
+      virtualMajor = aVirtualMajor;
+      virtualMinor = aVirtualMinor;
+      type = aType;
+      name = aName;
+      mIsSubscribed = aIsSubscribed;
    }
 
    public void setAllFields(String programString,
@@ -91,6 +109,21 @@ public class ChannelScanProgram implements Serializable
       }
       
       return programNumber + ": " + virtualMajor + "." + virtualMinor+ " " +name;
+   }
+
+   public void setVirtualChannelStatus( TunerVStatus aVirtualChannelStatus )
+   {
+      if( aVirtualChannelStatus != null &&
+          aVirtualChannelStatus.returnStatus > 0 )
+      {
+         mIsSubscribed = !aVirtualChannelStatus.notSubscribed;
+         name = aVirtualChannelStatus.name;
+      }
+   }
+
+   public boolean isSubscribed()
+   {
+      return mIsSubscribed;
    }
    
 }

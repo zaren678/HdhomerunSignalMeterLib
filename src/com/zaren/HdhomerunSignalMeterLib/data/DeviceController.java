@@ -142,18 +142,7 @@ public class DeviceController implements Serializable
             mDevice.getTunerProgram( theProgram );
             final int theIntialProgram = Integer.parseInt( theProgram.getString() );          
 
-            boolean theIsSubscribed = true;
-            if( mDevice.getDeviceType().equals( HdhomerunDevice.DEVICE_CABLECARD ) )
-            {
-               TunerVStatus theVStatus = mDevice.getTunerVStatus();
-               
-               if( theVStatus.returnStatus == DeviceResponse.SUCCESS )
-               {
-                  theIsSubscribed = !theVStatus.notSubscribed;
-               }
-            }
-            
-            notifyObserversProgramListChanged( thePrograms, theInitialChannel, theIsSubscribed );
+            notifyObserversProgramListChanged( thePrograms, theInitialChannel );
             
             if( theIntialProgram > 0 && aReportInitialStatus )
             {               
@@ -802,14 +791,14 @@ public class DeviceController implements Serializable
       mPreviousTunerStatus.clone( mTunerStatus );      
    }
 
-   public void notifyObserversProgramListChanged( final ProgramsList thePrograms, final int theChannel, final boolean theIsSubscribed )
+   public void notifyObserversProgramListChanged( final ProgramsList thePrograms, final int theChannel )
    {
       mUiHandler.post( new Runnable()
       {         
          @Override
          public void run()
          {
-            mEvents.notifyProgramListChanged( DeviceController.this, thePrograms, theChannel, theIsSubscribed );
+            mEvents.notifyProgramListChanged( DeviceController.this, thePrograms, theChannel );
          }
       });  
    }

@@ -1,7 +1,14 @@
 package com.zaren.HdhomerunSignalMeterLib.data;
 
-public class TunerVStatus
+import java.io.Serializable;
+
+public class TunerVStatus implements Serializable
 {
+   /**
+    * 
+    */
+   private static final long serialVersionUID = 6678327678804261072L;
+   
    public String vChannel;
    public String name;
    public String auth;

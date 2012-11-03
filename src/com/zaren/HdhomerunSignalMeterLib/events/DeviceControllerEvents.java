@@ -106,9 +106,9 @@ public class DeviceControllerEvents implements Serializable
       return mProgramListChanged;
    }
    
-   public void notifyProgramListChanged( DeviceController aDeviceController, ProgramsList thePrograms, int aChannel, boolean theIsSubscribed )
+   public void notifyProgramListChanged( DeviceController aDeviceController, ProgramsList thePrograms, int aChannel )
    {
-      mProgramListChanged.raiseEvent( aDeviceController, thePrograms, aChannel, theIsSubscribed );
+      mProgramListChanged.raiseEvent( aDeviceController, thePrograms, aChannel );
    }
    
    public Observable< ProgramObserverInt > programChanged()
@@ -221,11 +221,11 @@ public class DeviceControllerEvents implements Serializable
        */
       private static final long serialVersionUID = -7860123203909553349L;
 
-      public void raiseEvent( DeviceController aDeviceController, ProgramsList thePrograms, int aChannel, boolean theIsSubscribed )
+      public void raiseEvent( DeviceController aDeviceController, ProgramsList thePrograms, int aChannel )
       {
          for( ProgramListObserverInt theObserver : mObservers )
          {
-            theObserver.programListChanged( aDeviceController, thePrograms, aChannel, theIsSubscribed );
+            theObserver.programListChanged( aDeviceController, thePrograms, aChannel );
          }
       }
    }

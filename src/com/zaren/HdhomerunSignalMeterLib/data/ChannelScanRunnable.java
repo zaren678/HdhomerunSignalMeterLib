@@ -170,18 +170,29 @@ public class ChannelScanRunnable implements Runnable
                thePrograms.clear();
                mDevice.getTunerStreamInfo( thePrograms );
                
-               boolean isSubscribed = true;
                if( mDevice.getDeviceType().equals( HdhomerunDevice.DEVICE_CABLECARD ) )
                {
-                  TunerVStatus theVStatus = mDevice.getTunerVStatus();
-                  
-                  if( theVStatus.returnStatus == DeviceResponse.SUCCESS )
+                  for( ChannelScanProgram theProgram : thePrograms )
                   {
-                     isSubscribed = !theVStatus.notSubscribed;
+                     int theVchannel = theProgram.virtualMajor;
+                     
+                     mDevice.setTunerVChannel( "" + theVchannel );
+                     int theVchannelStatus = mDevice.waitForLock( theTunerStatus );
+                     
+                     if( theVchannelStatus > 0 )
+                     {
+                        TunerVStatus theVStatus = mDevice.getTunerVStatus();
+                        
+                        if( theVStatus.returnStatus == DeviceResponse.SUCCESS )
+                        {
+                           HDHomerunLogger.d(" Channel scan vchannel status: " + theVStatus );
+                           theProgram.setVirtualChannelStatus( theVStatus );
+                        }
+                     }
                   }
                }
                
-               mCntrl.notifyObserversProgramListChanged( thePrograms, theCurrentChannel, isSubscribed );
+               mCntrl.notifyObserversProgramListChanged( thePrograms, theCurrentChannel );
                
                if( !mFullChannelScan )
                {

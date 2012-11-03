@@ -70,19 +70,8 @@ public class SetChannelRunnable implements Runnable
          mDeviceController.notifyObserversTunerStatus( theResponse, theTunerStatus, null );
          
          mDevice.getTunerStreamInfo(thePrograms);
-         
-         boolean isSubscribed = true;
-         if( mDevice.getDeviceType().equals( HdhomerunDevice.DEVICE_CABLECARD ) )
-         {
-            TunerVStatus theVStatus = mDevice.getTunerVStatus();
-            
-            if( theVStatus.returnStatus == DeviceResponse.SUCCESS )
-            {
-               isSubscribed = !theVStatus.notSubscribed;
-            }
-         }
-         
-         mDeviceController.notifyObserversProgramListChanged( thePrograms, mChannel, isSubscribed );                                                                                      
+                
+         mDeviceController.notifyObserversProgramListChanged( thePrograms, mChannel );                                                                                      
       }
       finally
       {
