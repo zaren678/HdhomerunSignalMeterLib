@@ -513,7 +513,22 @@ JNIEXPORT jstring JNICALL Java_com_zaren_HdhomerunSignalMeterLib_data_HdhomerunD
    
    MY_LOGD("C: JNIgetFirmwareVersion");
    
-   hdhomerun_device_get_version(device, &firmwarePtr, &version_num);
+   int count = 0;
+   while (1) 
+   {
+		if (hdhomerun_device_get_version(device, &firmwarePtr, &version_num) >= 0) 
+      {
+			break;
+		}
+
+		count++;
+		if (count > 10) 
+      {
+         return (*env)->NewStringUTF(env, "");			
+		}
+
+		msleep_minimum(250);
+	}
    
    return (*env)->NewStringUTF(env, firmwarePtr);
 }
