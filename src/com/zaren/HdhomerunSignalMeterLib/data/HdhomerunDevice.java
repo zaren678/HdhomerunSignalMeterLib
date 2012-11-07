@@ -2,9 +2,6 @@ package com.zaren.HdhomerunSignalMeterLib.data;
 
 import java.io.Serializable;
 import java.util.StringTokenizer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import com.zaren.HdhomerunSignalMeterLib.util.ErrorHandler;
 import com.zaren.HdhomerunSignalMeterLib.util.HDHomerunLogger;
 import com.zaren.HdhomerunSignalMeterLib.util.Utils;
@@ -221,47 +218,71 @@ public class HdhomerunDevice implements Serializable
    private void convertStreamInfoToPrograms(
          String streamInfo, ProgramsList thePrograms)
    {
-      StringTokenizer strings = new StringTokenizer(streamInfo,"\n");
-      Pattern programPattern3 = Pattern.compile("(\\d+): (\\d+)\\.?(\\d+)? (\\(?\\w+\\)?)");
+      StringTokenizer theProgramStrings = new StringTokenizer(streamInfo,"\n");
         
-      while(strings.hasMoreTokens())
+      while(theProgramStrings.hasMoreTokens())
       {
-         String str = strings.nextToken();
-         
-         //HDHomerunLogger.d("Processing: " + str);
-         
-         Matcher m = programPattern3.matcher(str);
-      
-         if(m.find() == true)
+         try
          {
+            String theProgramString = theProgramStrings.nextToken();            
+            StringTokenizer theProgNumAndName = new StringTokenizer( theProgramString, ":" );                  
             
-            ChannelScanProgram prog = new ChannelScanProgram();
+            ChannelScanProgram theProgram = new ChannelScanProgram();
+            theProgram.programString = theProgramString;
             
-            try
+            while(theProgNumAndName.hasMoreTokens())
             {
-               if(m.group(3) != null)
-               {
-                  prog.setAllFields(str, Integer.parseInt(m.group(1)), 
-                                         Integer.parseInt(m.group(2)),
-                                         Integer.parseInt(m.group(3)),
-                                         0, m.group(4));
-               }
-               else
-               {
-                  prog.setAllFields(str, Integer.parseInt(m.group(1)),
-                                         Integer.parseInt(m.group(2)),
-                                         0,
-                                         0, m.group(4));
-               }
+               theProgram.programNumber = Integer.parseInt( theProgNumAndName.nextToken() );
                
-               thePrograms.put( prog.programNumber, prog );
+               processProgramName( theProgNumAndName.nextToken(), theProgram );
             }
-            catch( NumberFormatException e )
-            {
-               //just catch and move on... must've got a bad program
-            }
+            
+            thePrograms.append( theProgram.programNumber, theProgram );
+         }
+         catch( NumberFormatException e )
+         {
+            // Just catch and move on
          }
       }
+   }
+
+   private void processProgramName( String aProgramName, ChannelScanProgram aProgram )
+   {
+      int theOpeningParen = aProgramName.indexOf( "(" );
+      int theClosingParen = aProgramName.indexOf( ")" );
+      
+      String theJustProgramName = aProgramName;
+      
+      if( theOpeningParen != -1 && theClosingParen != -1 )
+      {
+         //This is the string that says "control" or "encrypted" or "no data"
+         //String theTypeString = aProgramName.substring( theOpeningParen + 1, theClosingParen );
+         theJustProgramName = aProgramName.substring( 0, theOpeningParen );
+      }
+      
+      StringTokenizer theStrings = new StringTokenizer( theJustProgramName, " " );                  
+      String theChannelNumbers = theStrings.nextToken();      
+      StringTokenizer theChannelStrings = new StringTokenizer( theChannelNumbers, "." );      
+      aProgram.virtualMajor = Integer.parseInt( theChannelStrings.nextToken() );
+      
+      if( theChannelStrings.hasMoreTokens() )
+      {            
+         aProgram.virtualMinor = Integer.parseInt( theChannelStrings.nextToken() );
+      }
+      
+      StringBuilder theNameStringBuilder = new StringBuilder();
+      while( theStrings.hasMoreTokens() )
+      {            
+         String theString = theStrings.nextToken();
+        
+         if( theNameStringBuilder.length() > 0 )
+         {
+            theNameStringBuilder.append( " " );
+         }
+         theNameStringBuilder.append( theString );
+      }
+      
+      aProgram.name = theNameStringBuilder.toString();      
    }
 
    private synchronized native TunerStatus JNIgetTunerStatus(int cPointer);

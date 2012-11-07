@@ -5,12 +5,12 @@ import java.io.Serializable;
 public class ChannelScanProgram implements Serializable
 {
    private static final long serialVersionUID = 3131125398380181596L;
-   public String programString;
-   public int programNumber;
-   public int virtualMajor;
-   public int virtualMinor;
-   public int type;
-   public String name;
+   public String programString = "";
+   public int programNumber = 0;
+   public int virtualMajor = 0;
+   public int virtualMinor = 0;
+   public int type = 0;
+   public String name = "";
    boolean mIsSubscribed = true;
    
    public ChannelScanProgram()
