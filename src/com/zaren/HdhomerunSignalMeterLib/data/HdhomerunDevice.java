@@ -224,7 +224,10 @@ public class HdhomerunDevice implements Serializable
       {
          try
          {
-            String theProgramString = theProgramStrings.nextToken();            
+            String theProgramString = theProgramStrings.nextToken();
+            
+            //HDHomerunLogger.d( "Parsing program string: " + theProgramString );
+            
             StringTokenizer theProgNumAndName = new StringTokenizer( theProgramString, ":" );                  
             
             ChannelScanProgram theProgram = new ChannelScanProgram();
@@ -241,7 +244,7 @@ public class HdhomerunDevice implements Serializable
          }
          catch( NumberFormatException e )
          {
-            // Just catch and move on
+            HDHomerunLogger.e( "Error Parsing String: " + e );
          }
       }
    }

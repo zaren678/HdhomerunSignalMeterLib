@@ -103,7 +103,7 @@ static int channelscan_find_lock(struct hdhomerun_channelscan_t *scan, uint32_t 
 	}
 }
 
-static void channelscan_extract_name(struct hdhomerun_channelscan_program_t *program, const char *line)
+void channelscan_extract_name(struct hdhomerun_channelscan_program_t *program, const char *line)
 {
 	/* Find start of name. */
 	const char *start = strchr(line, ' ');

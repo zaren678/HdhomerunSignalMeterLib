@@ -48,6 +48,8 @@ extern LIBTYPE int channelscan_advance(struct hdhomerun_channelscan_t *scan, str
 extern LIBTYPE int channelscan_detect(struct hdhomerun_channelscan_t *scan, struct hdhomerun_channelscan_result_t *result);
 extern LIBTYPE uint8_t channelscan_get_progress(struct hdhomerun_channelscan_t *scan);
 
+void channelscan_extract_name(struct hdhomerun_channelscan_program_t *program, const char *line);
+
 #ifdef __cplusplus
 }
 #endif
