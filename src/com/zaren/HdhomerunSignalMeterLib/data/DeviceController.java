@@ -1,6 +1,5 @@
 package com.zaren.HdhomerunSignalMeterLib.data;
 
-import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -19,12 +18,8 @@ import com.zaren.HdhomerunSignalMeterLib.util.Utils;
  * @author john
  * 
  */
-public class DeviceController implements Serializable
+public class DeviceController
 {
-   /**
-    * 
-    */
-   private static final long serialVersionUID = 1858437034303215606L;
    public static final long SLEEP_TIME_BETWEEN_TASKS = 50;
    private HdhomerunDevice mDevice;
    private boolean mDeviceReady = false;
