@@ -71,7 +71,7 @@ public class ChannelScanResults
                           int programNumber,
                           int virtualMajor,
                           int virtualMinor,
-                          int type,
+                          String type,
                           String name)
    {
       

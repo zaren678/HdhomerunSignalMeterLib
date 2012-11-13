@@ -226,7 +226,7 @@ public class HdhomerunDevice implements Serializable
          {
             String theProgramString = theProgramStrings.nextToken();
             
-            //HDHomerunLogger.d( "Parsing program string: " + theProgramString );
+            HDHomerunLogger.d( "Parsing program string: " + theProgramString );
             
             StringTokenizer theProgNumAndName = new StringTokenizer( theProgramString, ":" );                  
             
@@ -259,7 +259,8 @@ public class HdhomerunDevice implements Serializable
       if( theOpeningParen != -1 && theClosingParen != -1 )
       {
          //This is the string that says "control" or "encrypted" or "no data"
-         //String theTypeString = aProgramName.substring( theOpeningParen + 1, theClosingParen );
+         String theTypeString = aProgramName.substring( theOpeningParen + 1, theClosingParen );
+         aProgram.type = theTypeString;
          theJustProgramName = aProgramName.substring( 0, theOpeningParen );
       }
       
