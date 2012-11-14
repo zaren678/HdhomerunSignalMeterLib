@@ -281,10 +281,10 @@ JNIEXPORT jint JNICALL Java_com_zaren_HdhomerunSignalMeterLib_data_HdhomerunDevi
 }
 
 //TODO USE REAL LIBRARY CHANNEL SCAN
-int waitForPrograms( struct hdhomerun_device_t* device, bool_t *pchanged, bool_t *pincomplete )
+int detectPrograms( struct hdhomerun_device_t* device, struct hdhomerun_channelscan_result_t *result, bool_t *pchanged, bool_t *pincomplete )
 {   
-   *pincomplete = FALSE;
-   *pchanged = FALSE;
+   	*pchanged = FALSE;
+	*pincomplete = FALSE;
 
 	char *streaminfo;
 	int ret = hdhomerun_device_get_tuner_streaminfo(device, &streaminfo);
@@ -304,12 +304,12 @@ int waitForPrograms( struct hdhomerun_device_t* device, bool_t *pchanged, bool_t
 		}
 		*next_line++ = 0;
 
-		// unsigned int transport_stream_id;
-		// if (sscanf(line, "tsid=0x%x", &transport_stream_id) == 1) {
-			// result->transport_stream_id = transport_stream_id;
-			// result->transport_stream_id_detected = TRUE;
-			// continue;
-		// }
+		unsigned int transport_stream_id;
+		if (sscanf(line, "tsid=0x%x", &transport_stream_id) == 1) {
+			result->transport_stream_id = transport_stream_id;
+			result->transport_stream_id_detected = TRUE;
+			continue;
+		}
 
 		if (program_count >= HDHOMERUN_CHANNELSCAN_MAX_PROGRAM_COUNT) {
 			continue;
@@ -350,10 +350,10 @@ int waitForPrograms( struct hdhomerun_device_t* device, bool_t *pchanged, bool_t
 			}
 		}
 
-		// if (memcmp(&result->programs[program_count], &program, sizeof(program)) != 0) {
-			// memcpy(&result->programs[program_count], &program, sizeof(program));
-			// *pchanged = TRUE;
-		// }
+		if (memcmp(&result->programs[program_count], &program, sizeof(program)) != 0) {
+			memcpy(&result->programs[program_count], &program, sizeof(program));
+			*pchanged = TRUE;
+		}
 
 		program_count++;
 	}
@@ -361,10 +361,10 @@ int waitForPrograms( struct hdhomerun_device_t* device, bool_t *pchanged, bool_t
 	if (program_count == 0) {
 		*pincomplete = TRUE;
 	}
-	// if (result->program_count != program_count) {
-		// result->program_count = program_count;
-		// *pincomplete = TRUE;
-	// }
+	if (result->program_count != program_count) {
+		result->program_count = program_count;
+		*pchanged = TRUE;
+	}
 
 	return 1;
 }
@@ -374,101 +374,108 @@ JNIEXPORT jint JNICALL Java_com_zaren_HdhomerunSignalMeterLib_data_HdhomerunDevi
 {
    struct hdhomerun_device_t* device = (struct hdhomerun_device_t*)cPointer;
    int retVal = 1;
-   struct hdhomerun_tuner_status_t cTunerStatus;
    jclass TunerStatusClass;
    jmethodID setAllFieldsId;
    
    MY_LOGD("C: waitForLock");
    
-   retVal = hdhomerun_device_wait_for_lock(device, &cTunerStatus);
+   struct hdhomerun_channelscan_result_t result;
    
-   if( (retVal > 0) && (cTunerStatus.lock_supported == TRUE))
+   /* Wait for lock. */
+	retVal = hdhomerun_device_wait_for_lock(device, &result.status);
+	if (!result.status.lock_supported) 
    {
-      /* Wait for symbol quality = 100%. */
+		retVal = 1;
+	}
+
+	if( retVal > 0 && result.status.lock_supported )
+   {
       uint64_t timeout = getcurrenttime() + 5000;
       while (1) 
       {
-         retVal = hdhomerun_device_get_tuner_status(device, NULL, &cTunerStatus);
-         if (retVal <= 0)
+         retVal = hdhomerun_device_get_tuner_status(device, NULL, &result.status);
+         if (retVal <= 0) 
          {
-            break;// retVal;
+            break;
          }
 
-         if (cTunerStatus.symbol_error_quality == 100)
-         {
-            retVal = 1;
-            break;// 1;
+         if (result.status.symbol_error_quality == 100) {
+            break;
          }
 
-         if (getcurrenttime() >= timeout)
-         {
-            retVal = 1;
-            break;//return 1;
+         if (getcurrenttime() >= timeout) {
+            break;
          }
 
          msleep_approx(250);
       }
       
-      if (strstr(hdhomerun_device_get_model_str(device), "atsc")) 
+      if( retVal > 0 )
       {
-         timeout = getcurrenttime() + 4000;
-      } 
-      else 
-      {
-         timeout = getcurrenttime() + 10000;
-      }
+         /* Detect programs. */
+         result.program_count = 0;
 
-      uint64_t complete_time = getcurrenttime() + 1000;
-
-      //wait for programs to all be read
-      while (1) 
-      {
-         bool_t changed, incomplete;
-         retVal = waitForPrograms(device, &changed, &incomplete);
-         if (retVal <= 0) 
+         uint64_t timeout;
+         if (strstr(hdhomerun_device_get_model_str(device), "atsc")) 
          {
-            return retVal;
-         }		
-
-         if (changed) 
+            timeout = getcurrenttime() + 4000;
+         } 
+         else 
          {
-            complete_time = getcurrenttime() + 1000;
+            timeout = getcurrenttime() + 10000;
          }
 
-         if (!incomplete && (getcurrenttime() >= complete_time)) 
-         {
-            break;
-         }
-         
-         if (getcurrenttime() >= timeout) 
-         {
-            break;
-         }
+         uint64_t complete_time = getcurrenttime() + 1000;
 
-         msleep_approx(250);
+         while (1) 
+         {
+            bool_t changed, incomplete;
+            retVal = detectPrograms(device, &result, &changed, &incomplete);
+            if (retVal <= 0) 
+            {
+               break;
+            }
+
+            if (changed) 
+            {
+               complete_time = getcurrenttime() + 1000;
+            }
+
+            if (!incomplete && (getcurrenttime() >= complete_time)) 
+            {
+               break;
+            }
+
+            if (getcurrenttime() >= timeout) 
+            {
+               break;
+            }
+
+            msleep_approx(250);
+         }
       }
    }
    
    
 
    MY_LOGD("C: waitForLock lock_Supported %d, lock_unsupported %d, signal_present %d",
-                      cTunerStatus.lock_supported,
-                      cTunerStatus.lock_unsupported,
-                      cTunerStatus.signal_present);
+                      result.status.lock_supported,
+                      result.status.lock_unsupported,
+                      result.status.signal_present);
    
    TunerStatusClass = (*env)->FindClass(env,"com/zaren/HdhomerunSignalMeterLib/data/TunerStatus");
    setAllFieldsId = (*env)->GetMethodID(env,TunerStatusClass,"setAllFields","(Ljava/lang/String;Ljava/lang/String;ZZZJJJJJI)V");
    (*env)->CallVoidMethod(env, tunerStatus, setAllFieldsId,
-            (*env)->NewStringUTF(env, cTunerStatus.channel),
-             (*env)->NewStringUTF(env, cTunerStatus.lock_str),
-             (jboolean)cTunerStatus.signal_present,
-             (jboolean)cTunerStatus.lock_supported,
-             (jboolean)cTunerStatus.lock_unsupported,
-             (jlong)cTunerStatus.signal_strength,
-             (jlong)cTunerStatus.signal_to_noise_quality,
-             (jlong)cTunerStatus.symbol_error_quality,
-             (jlong)cTunerStatus.raw_bits_per_second,
-             (jlong)cTunerStatus.packets_per_second,
+            (*env)->NewStringUTF(env, result.status.channel),
+             (*env)->NewStringUTF(env, result.status.lock_str),
+             (jboolean)result.status.signal_present,
+             (jboolean)result.status.lock_supported,
+             (jboolean)result.status.lock_unsupported,
+             (jlong)result.status.signal_strength,
+             (jlong)result.status.signal_to_noise_quality,
+             (jlong)result.status.symbol_error_quality,
+             (jlong)result.status.raw_bits_per_second,
+             (jlong)result.status.packets_per_second,
              (jint)retVal);
              
    return retVal;
