@@ -11,8 +11,11 @@ public class HdhomerunDevice implements Serializable
    private static final long serialVersionUID = 1942906208628106963L;
    public static final String DEVICE_CABLECARD = "cablecard";
    public static final String DEVICE_ATSC = "atsc";
+   
+   //reset constants
    public static final String SELF = "self";
    public static final String CABLECARD = "cablecard";
+   
    private int cPointer;
    private long deviceId;
    private int ipAddr;

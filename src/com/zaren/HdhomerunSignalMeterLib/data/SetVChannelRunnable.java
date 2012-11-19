@@ -91,6 +91,7 @@ public class SetVChannelRunnable implements Runnable
          mDeviceController.notifyObserversProgramChanged( theResponse, thePrograms.get( theFinalProgramPosition ) );
       }
       
+      mDeviceController.notifyObserversChannelChanged( theResponse, mChannel );
       mDeviceController.setProgressBarBusy( false );
 
       //Seems like the device needs a little time before it does something else here

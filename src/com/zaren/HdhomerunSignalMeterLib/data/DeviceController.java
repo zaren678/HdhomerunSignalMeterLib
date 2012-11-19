@@ -1,8 +1,11 @@
 package com.zaren.HdhomerunSignalMeterLib.data;
 
 import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.UnknownHostException;
 
+import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -43,12 +46,14 @@ public class DeviceController
                                                                    // is not
                                                                    // serializable
    private volatile String mCurrentChannelMap;
+   private Context mContext;
 
-   public DeviceController( HdhomerunDiscoverDevice discoverDevice, IndeterminateProgressBarInt aProgressBar )
+   public DeviceController( HdhomerunDiscoverDevice discoverDevice, IndeterminateProgressBarInt aProgressBar, Context aContext )
    {
       mCurrentChannelMap = "none";
       mEvents = new DeviceControllerEvents();
       mProgressBar = aProgressBar;
+      mContext = aContext;
       mTunerStatus = new TunerStatus();
       mPreviousTunerStatus = new TunerStatus();
       mUiHandler = new Handler();
@@ -542,8 +547,30 @@ public class DeviceController
       }
 
       setProgressBarBusy( true );
-      mChannelScanTask = new ChannelScanRunnable( this, mChannelList );
-      mDeviceHandler.post( mChannelScanTask );
+      
+      if( getDevice().getDeviceType().equals( HdhomerunDevice.DEVICE_CABLECARD ) )
+      {
+         try
+         {
+            int theIpVal = getDevice().getIpAddr();
+            String theIpAddr = Utils.HdHrIpAddressToString( theIpVal );
+   
+            URL theUrl = new URL( "http://"+ theIpAddr + "/lineup.xml?show=unprotected" );            
+            
+            mDeviceHandler.post(  new PrimeChannelScanRunnable( this, mContext, theUrl ) );
+         }
+         catch( MalformedURLException e)
+         {
+            //SEND FAIL
+            setProgressBarBusy( false );
+            notifyChannelScanComplete( new DeviceResponse( DeviceResponse.FAILURE ) );
+         }
+      }
+      else
+      {
+         mChannelScanTask = new ChannelScanRunnable( this, mChannelList );
+         mDeviceHandler.post( mChannelScanTask );
+      }
    }
 
    public void channelScanBackward()
@@ -880,6 +907,25 @@ public class DeviceController
             mProgressBar.setProgressBarBusy( aIsBusy );
          }
       } );
+   }
+   
+   public void setProgressBar( IndeterminateProgressBarInt aProgress )
+   {
+      boolean theBusy = false;
+      
+      if( mProgressBar != null )
+      {
+         theBusy = mProgressBar.getProgressBarBusy();
+      }
+      
+      mProgressBar = aProgress;
+      
+      setProgressBarBusy( theBusy );
+   }
+   
+   public void setContext( Context aContext )
+   {
+      mContext = aContext;
    }
 
    public DeviceControllerEvents events()

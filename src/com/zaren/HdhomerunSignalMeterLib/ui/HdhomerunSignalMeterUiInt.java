@@ -1,5 +1,7 @@
 package com.zaren.HdhomerunSignalMeterLib.ui;
 
+import android.content.Context;
+
 import com.zaren.HdhomerunSignalMeterLib.data.DeviceController;
 
 public interface HdhomerunSignalMeterUiInt
@@ -15,6 +17,8 @@ public interface HdhomerunSignalMeterUiInt
     * @return the cntrl
     */
    public abstract DeviceController getCntrl();
+   
+   public abstract Context getContext();
 
    public abstract void pause();
 

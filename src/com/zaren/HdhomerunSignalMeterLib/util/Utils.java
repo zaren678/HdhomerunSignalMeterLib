@@ -35,6 +35,27 @@ public class Utils
       return theByteArray;
    }
    
+   public static String HdHrIpAddressToString( int ipAddress )
+   {
+      StringBuilder theBuilder = new StringBuilder();
+      
+      byte[] theByteArray = HdHrIpAddressToByteArray( ipAddress );
+      
+      for( int i=0; i < theByteArray.length; i++ )
+      {
+         if( i == 0 )
+         {
+            theBuilder.append( "" + (int)( theByteArray[i] & 0xFF ) );
+         }
+         else
+         {
+            theBuilder.append( "." + (int)( theByteArray[i] & 0xFF ) );
+         }
+      }
+      
+      return theBuilder.toString();
+   }
+   
    public static String getChannelStringFromTunerStatusChannel(HdhomerunDevice aDevice, String aChannel, String aLockStr)
    {
       HDHomerunLogger.v("getChannelNumberFromTunerStatusChannel: "+aChannel + " " + aLockStr);

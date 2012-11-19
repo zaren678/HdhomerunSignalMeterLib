@@ -37,7 +37,7 @@ public class OnDeviceSelectedListener implements OnItemSelectedListener
 		}
 		
 		
-		mCtrl = new DeviceController(discoverDeviceSelected, mProgressBar);
+		mCtrl = new DeviceController(discoverDeviceSelected, mProgressBar, mUi.getContext() );
 		mCtrl.waitForDeviceReady();
 		mCtrl.initialize( true );
 		mCtrl.startTunerStatusUpdates();

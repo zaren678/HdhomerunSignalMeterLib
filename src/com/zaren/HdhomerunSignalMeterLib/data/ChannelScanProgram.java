@@ -9,7 +9,8 @@ public class ChannelScanProgram implements Serializable
    public static final String PROGRAM_ENCRYPTED = "encrypted";
    public static final String PROGRAM_CONTROL = "control";
    public static final String PROGRAM_NODATA = "no data";
-   public static final String PROGRAM_NORMAL = "normal";  
+   public static final String PROGRAM_NORMAL = "normal";
+   public static final String PROGRAM_VCHANNEL = "vchannel";  
    
    public String programString = "";
    public int programNumber = 0;
