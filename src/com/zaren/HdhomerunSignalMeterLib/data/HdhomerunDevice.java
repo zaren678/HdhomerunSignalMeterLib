@@ -1,6 +1,7 @@
 package com.zaren.HdhomerunSignalMeterLib.data;
 
 import java.io.Serializable;
+import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import com.zaren.HdhomerunSignalMeterLib.util.ErrorHandler;
 import com.zaren.HdhomerunSignalMeterLib.util.HDHomerunLogger;
@@ -227,16 +228,21 @@ public class HdhomerunDevice implements Serializable
       {
          try
          {
-            String theProgramString = theProgramStrings.nextToken();
+            String theProgramString = "";
             
-            HDHomerunLogger.d( "Parsing program string: " + theProgramString );
+            if( theProgramStrings.hasMoreTokens() )
+            {
+               theProgramString = theProgramStrings.nextToken();
+            }
+            
+            //HDHomerunLogger.d( "Parsing program string: " + theProgramString );
             
             StringTokenizer theProgNumAndName = new StringTokenizer( theProgramString, ":" );                  
             
             ChannelScanProgram theProgram = new ChannelScanProgram();
             theProgram.programString = theProgramString;
             
-            while(theProgNumAndName.hasMoreTokens())
+            while( theProgNumAndName.hasMoreTokens() )
             {
                theProgram.programNumber = Integer.parseInt( theProgNumAndName.nextToken() );
                
@@ -248,6 +254,10 @@ public class HdhomerunDevice implements Serializable
          catch( NumberFormatException e )
          {
             HDHomerunLogger.e( "Error Parsing String: " + e );
+         }
+         catch( NoSuchElementException e )
+         {
+            HDHomerunLogger.e( "NoSuchElementException: " + e );
          }
       }
    }
