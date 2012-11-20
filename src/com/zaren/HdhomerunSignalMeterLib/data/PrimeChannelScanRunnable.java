@@ -9,8 +9,13 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
+import java.net.URISyntaxException;
 import java.net.URL;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.xmlpull.v1.XmlPullParserException;
 
 import com.zaren.HdhomerunSignalMeterLib.util.HDHomerunLogger;
@@ -140,6 +145,22 @@ public class PrimeChannelScanRunnable implements Runnable
             theResponse.putString( DeviceResponse.KEY_ERROR, "IO Error" );
          }
       }
+      catch( URISyntaxException e )
+      {
+         theResponse.setStatus( DeviceResponse.FAILURE );
+         if( e.getLocalizedMessage() != null )
+         {
+            theResponse.putString( DeviceResponse.KEY_ERROR, "Bad URI Syntax: " + e.getLocalizedMessage() );
+         }
+         else if( e.getMessage() != null )
+         {
+            theResponse.putString( DeviceResponse.KEY_ERROR, "Bad URI Syntax: " + e.getMessage() );
+         }
+         else
+         {
+            theResponse.putString( DeviceResponse.KEY_ERROR, "Bad URI Syntax" );
+         }
+      }
       finally
       {
          mDeviceController.setProgressBarBusy( false );
@@ -183,19 +204,39 @@ public class PrimeChannelScanRunnable implements Runnable
       fileOutput.close();       
    }
 
-   private void downloadChannelList( URL aLineupUrl ) throws MalformedURLException, IOException, ProtocolException, FileNotFoundException
+   private void downloadChannelList( URL aLineupUrl ) throws MalformedURLException, IOException, ProtocolException, FileNotFoundException, URISyntaxException
    {
       HDHomerunLogger.d( "DownloadChannelList: URL: " + aLineupUrl );
-      HttpURLConnection urlConnection = (HttpURLConnection) aLineupUrl.openConnection();
-
-      urlConnection.setRequestMethod( "GET" );
-      urlConnection.setDoOutput( true );
-
-      urlConnection.connect();
+      
+      boolean theUseApache = true;
+      
+      InputStream theInputStream;
+      
+      if( theUseApache )
+      {
+         HDHomerunLogger.d( "DownloadChannelList: Using Apache HTTP client" );
+         
+         HttpClient httpClient = new DefaultHttpClient();
+         HttpGet pageGet = new HttpGet( aLineupUrl.toURI() );
+         HttpResponse response = httpClient.execute( pageGet );
+         
+         theInputStream = response.getEntity().getContent();
+      }
+      else
+      {
+         HttpURLConnection urlConnection = (HttpURLConnection) aLineupUrl.openConnection();
+   
+         urlConnection.setRequestMethod( "GET" );
+         urlConnection.setDoOutput( true );   
+         urlConnection.connect();
+         
+         theInputStream = urlConnection.getInputStream();
+      }
+      
 
       FileOutputStream fileOutput = mContext.openFileOutput( FILENAME, Context.MODE_PRIVATE );
 
-      InputStream inputStream = urlConnection.getInputStream();
+      
 
       //int totalSize = urlConnection.getContentLength();
 
@@ -204,7 +245,7 @@ public class PrimeChannelScanRunnable implements Runnable
       byte[] buffer = new byte[1024];
       int bufferLength = 0; // used to store a temporary size of the buffer
 
-      while( ( bufferLength = inputStream.read( buffer ) ) > 0 )
+      while( ( bufferLength = theInputStream.read( buffer ) ) > 0 )
       {
 
          fileOutput.write( buffer, 0, bufferLength );
