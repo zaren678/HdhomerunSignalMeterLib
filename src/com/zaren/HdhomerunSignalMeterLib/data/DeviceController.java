@@ -913,19 +913,6 @@ public class DeviceController
       } );
    }
 
-   public void notifyObserversVChannelChanged( final DeviceResponse aResponse, final String aChannel )
-   {
-      mUiHandler.post( new Runnable()
-      {
-         @Override
-         public void run()
-         {
-            mEvents.notifyVChannelChanged( aResponse, DeviceController.this, aChannel );
-         }
-      } );
-      
-   }
-
    public void setProgressBarBusy( final boolean aIsBusy )
    {
       mUiHandler.post( new Runnable()
