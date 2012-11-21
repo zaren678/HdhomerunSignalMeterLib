@@ -21,6 +21,7 @@ public class DeviceControllerEvents implements Serializable
    private ChannelMapObservable mChannelMapChanged;
    private ChannelMapListObservable mChannelMapListChanged;
    private ChannelChangedObserver mChannelChanged;
+   private VChannelChangedObserver mVChannelChanged;
    private ChannelLockedObserver mChannelLocked;
    private ChannelScanCompleteObserver mChannelScanComplete;
    private ProgramListObserver mProgramListChanged;
@@ -81,6 +82,11 @@ public class DeviceControllerEvents implements Serializable
       mChannelChanged.raiseEvent( aResponse, aDeviceController, aNewChannel );
    }
    
+   public void notifyVChannelChanged( DeviceResponse aResponse, DeviceController aDeviceController, String aChannel )
+   {
+      mVChannelChanged.raiseEvent( aResponse, aDeviceController, aChannel );      
+   }
+
    public Observable< ChannelLockedObserverInt > channelLocked()
    {
       return mChannelLocked;
@@ -175,6 +181,22 @@ public class DeviceControllerEvents implements Serializable
          for( ChannelChangedObserverInt theObserver : mObservers )
          {
             theObserver.channelChanged( aResponse, aDeviceController, aNewChannel );
+         }
+      }
+   }
+   
+   private class VChannelChangedObserver extends ObservableWithCheck< VChannelChangedObserverInt > implements Serializable
+   {
+      /**
+       * 
+       */
+      private static final long serialVersionUID = 5389849705930695344L;
+
+      public void raiseEvent( DeviceResponse aResponse, DeviceController aDeviceController, String aChannel )
+      {
+         for( VChannelChangedObserverInt theObserver : mObservers )
+         {
+            theObserver.vChannelChanged( aResponse, aDeviceController, aChannel );
          }
       }
    }

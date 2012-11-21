@@ -61,9 +61,12 @@ public class PrimeChannelScanRunnable implements Runnable
          }
          //now process the xml
          ProgramsList thePrograms = processChannelList();
-                          
-         //send program list changed
-         mDeviceController.notifyObserversProgramListChanged( thePrograms, -1 );                  
+         
+         if( mDeviceController != null )
+         {
+            //send program list changed
+            mDeviceController.notifyObserversProgramListChanged( thePrograms, -1 );
+         }
       }
       catch( MalformedURLException e )
       {
@@ -163,10 +166,13 @@ public class PrimeChannelScanRunnable implements Runnable
       }
       finally
       {
-         mDeviceController.setProgressBarBusy( false );
-         
-         //send channel scan complete
-         mDeviceController.notifyChannelScanComplete( theResponse );
+         if( mDeviceController != null )
+         {
+            mDeviceController.setProgressBarBusy( false );
+            
+            //send channel scan complete
+            mDeviceController.notifyChannelScanComplete( theResponse );
+         }
       }
 
    }

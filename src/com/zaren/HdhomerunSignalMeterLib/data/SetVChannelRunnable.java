@@ -5,11 +5,11 @@ import com.zaren.HdhomerunSignalMeterLib.util.HDHomerunLogger;
 public class SetVChannelRunnable implements Runnable
 {
 
-   private int mChannel;
+   private String mChannel;
    private DeviceController mDeviceController;
    private HdhomerunDevice mDevice;
    
-   public SetVChannelRunnable( DeviceController aController, int aChannel )
+   public SetVChannelRunnable( DeviceController aController, String aChannel )
    {
       mChannel = aChannel;
       mDeviceController = aController;
@@ -91,7 +91,7 @@ public class SetVChannelRunnable implements Runnable
          mDeviceController.notifyObserversProgramChanged( theResponse, thePrograms.get( theFinalProgramPosition ) );
       }
       
-      mDeviceController.notifyObserversChannelChanged( theResponse, mChannel );
+      mDeviceController.notifyObserversVChannelChanged( theResponse, mChannel );
       mDeviceController.setProgressBarBusy( false );
 
       //Seems like the device needs a little time before it does something else here

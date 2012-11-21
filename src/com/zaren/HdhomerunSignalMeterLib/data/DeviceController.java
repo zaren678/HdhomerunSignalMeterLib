@@ -425,7 +425,7 @@ public class DeviceController
       }
    }
 
-   public void setTunerChannel( int channel, boolean virtualTune )
+   public void setTunerChannel( String aChannel, boolean aIsVirtualTune )
    {
       if( mDevice == null )
       {
@@ -446,32 +446,10 @@ public class DeviceController
 
       if( mDevice.getDeviceType().equals( HdhomerunDevice.DEVICE_ATSC ) )
       {
-         if( ( channel > mChannelList.getMaxNumber() ) || ( channel < mChannelList.getMinNumber() ) )
+         try
          {
-            ErrorHandler.HandleError( "Channel Out of Range: Valid range for this channelmap is " + mChannelList.getMinNumber() + " to "
-                  + mChannelList.getMaxNumber() );
-            return;
-         }
-         else
-         {
-            HDHomerunLogger.d( "setTunerChannel: channel " + channel );
-
-            setProgressBarBusy( true );
-            mDeviceHandler.post( new SetChannelRunnable( this, channel ) );
-         }
-      }
-
-      else if( ( mDevice.getDeviceType().equals( HdhomerunDevice.DEVICE_CABLECARD ) ) )
-      {
-         if( virtualTune == true )
-         {
-            // this means its a virtual channel number
-            setProgressBarBusy( true );
-            mDeviceHandler.post( new SetVChannelRunnable( this, channel ) );
-         }
-         else
-         {
-            if( ( channel > mChannelList.getMaxNumber() ) || ( channel < mChannelList.getMinNumber() ) )
+            int theChannel = Integer.parseInt( aChannel );
+            if( ( theChannel > mChannelList.getMaxNumber() ) || ( theChannel < mChannelList.getMinNumber() ) )
             {
                ErrorHandler.HandleError( "Channel Out of Range: Valid range for this channelmap is " + mChannelList.getMinNumber() + " to "
                      + mChannelList.getMaxNumber() );
@@ -479,10 +457,48 @@ public class DeviceController
             }
             else
             {
-               HDHomerunLogger.d( "setTunerChannel: channel " + channel );
+               HDHomerunLogger.d( "setTunerChannel: channel " + theChannel );
+   
+               setProgressBarBusy( true );
+               mDeviceHandler.post( new SetChannelRunnable( this, theChannel ) );
+            }
+         }
+         catch( NumberFormatException e )
+         {         
+            HDHomerunLogger.e("setTunerChannel: Failed to parse channel: " + e );
+         }
+      }
 
-               mProgressBar.setProgressBarBusy( true );
-               mDeviceHandler.post( new SetChannelRunnable( this, channel ) );
+      else if( ( mDevice.getDeviceType().equals( HdhomerunDevice.DEVICE_CABLECARD ) ) )
+      {
+         if( aIsVirtualTune == true )
+         {
+            // this means its a virtual channel number
+            setProgressBarBusy( true );
+            mDeviceHandler.post( new SetVChannelRunnable( this, aChannel ) );
+         }
+         else
+         {
+            try
+            {
+               int theChannel = Integer.parseInt( aChannel );
+               if( ( theChannel > mChannelList.getMaxNumber() ) || ( theChannel < mChannelList.getMinNumber() ) )
+               {
+                  ErrorHandler.HandleError( "Channel Out of Range: Valid range for this channelmap is " + mChannelList.getMinNumber() + " to "
+                        + mChannelList.getMaxNumber() );
+                  return;
+               }
+               else
+               {
+                  HDHomerunLogger.d( "setTunerChannel: channel " + theChannel );
+   
+                  mProgressBar.setProgressBarBusy( true );
+                  mDeviceHandler.post( new SetChannelRunnable( this, theChannel ) );
+               }
+            }
+            catch( NumberFormatException e )
+            {
+               HDHomerunLogger.e("setTunerChannel: Failed to parse channel: " + e );
             }
          }
       }
@@ -895,6 +911,19 @@ public class DeviceController
             mEvents.notifyChannelChanged( aResponse, DeviceController.this, aChannel );
          }
       } );
+   }
+
+   public void notifyObserversVChannelChanged( final DeviceResponse aResponse, final String aChannel )
+   {
+      mUiHandler.post( new Runnable()
+      {
+         @Override
+         public void run()
+         {
+            mEvents.notifyVChannelChanged( aResponse, DeviceController.this, aChannel );
+         }
+      } );
+      
    }
 
    public void setProgressBarBusy( final boolean aIsBusy )

@@ -56,8 +56,15 @@ public class LineupXMLParser
          // Starts by looking for the program tag
          if( name.equals( "Program" ) )
          {
-            ChannelScanProgram theProgram = readProgram( aParser );
-            thePrograms.append( theProgram.programNumber, theProgram );
+            try
+            {
+               ChannelScanProgram theProgram = readProgram( aParser );
+               thePrograms.append( theProgram.programNumber, theProgram );
+            }
+            catch ( NumberFormatException e )
+            {
+               HDHomerunLogger.e( "Failed to parse program from xml: " + e );               
+            }
          }
          else
          {
@@ -70,7 +77,8 @@ public class LineupXMLParser
    private ChannelScanProgram readProgram( XmlPullParser aParser ) throws XmlPullParserException, IOException
    {
       aParser.require( XmlPullParser.START_TAG, ns, PROGRAM );
-      int theGuideNumber = 0;
+      Integer theGuideMajorNumber = 0;
+      Integer theGuideMinorNumber = 0;
       String theGuideName = null;
 
       while( aParser.next() != XmlPullParser.END_TAG )
@@ -83,7 +91,8 @@ public class LineupXMLParser
          String name = aParser.getName();
          if( name.equals( GUIDE_NUMBER ) )
          {
-            theGuideNumber = readGuideNumber( aParser );
+            String theGuideNumberStr = readGuideNumber( aParser );
+            parseGuideNumber( theGuideNumberStr, theGuideMajorNumber, theGuideMinorNumber );
          }
          else if( name.equals( GUIDE_NAME ) )
          {
@@ -95,17 +104,37 @@ public class LineupXMLParser
          }
       }
       mProgramNum++;
-      return new ChannelScanProgram( theGuideName, mProgramNum, theGuideNumber, 0, ChannelScanProgram.PROGRAM_VCHANNEL, theGuideName, true );
+      return new ChannelScanProgram( theGuideName, mProgramNum, theGuideMajorNumber, theGuideMinorNumber, ChannelScanProgram.PROGRAM_VCHANNEL, theGuideName, true );
    }
 
-   private int readGuideNumber( XmlPullParser aParser ) throws IOException, XmlPullParserException
+   private void parseGuideNumber( String aGuideNumberStr, Integer aGuideMajorNumber, Integer aGuideMinorNumber )
    {
-      int theGuideNumber = -1;
+      int thePointIndex = aGuideNumberStr.indexOf( '.' );
+      
+      if( thePointIndex > -1 )
+      {
+         String theMajorNum = aGuideNumberStr.substring( 0, thePointIndex );
+         String theMinorNum = aGuideNumberStr.substring( thePointIndex + 1, aGuideNumberStr.length() );
+         
+         aGuideMajorNumber = Integer.parseInt( theMajorNum );
+         aGuideMinorNumber = Integer.parseInt( theMinorNum );
+      }
+      else
+      {
+         aGuideMajorNumber = Integer.parseInt( aGuideNumberStr );
+         aGuideMinorNumber = 0;
+      }
+      
+   }
+
+   private String readGuideNumber( XmlPullParser aParser ) throws IOException, XmlPullParserException
+   {
+      String theGuideNumber = "";
       
       try
       {
          aParser.require( XmlPullParser.START_TAG, ns, GUIDE_NUMBER );
-         theGuideNumber = Integer.parseInt( readText( aParser ) );
+         theGuideNumber = readText( aParser );
          aParser.require( XmlPullParser.END_TAG, ns, GUIDE_NUMBER );         
       }
       catch( NumberFormatException e )
