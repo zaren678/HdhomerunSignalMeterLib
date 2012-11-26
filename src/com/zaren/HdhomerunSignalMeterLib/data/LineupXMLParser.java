@@ -77,10 +77,9 @@ public class LineupXMLParser
    private ChannelScanProgram readProgram( XmlPullParser aParser ) throws XmlPullParserException, IOException
    {
       aParser.require( XmlPullParser.START_TAG, ns, PROGRAM );
-      Integer theGuideMajorNumber = 0;
-      Integer theGuideMinorNumber = 0;
-      String theGuideName = null;
 
+      ChannelScanProgram theProgram = new ChannelScanProgram();
+      
       while( aParser.next() != XmlPullParser.END_TAG )
       {
          if( aParser.getEventType() != XmlPullParser.START_TAG )
@@ -92,11 +91,13 @@ public class LineupXMLParser
          if( name.equals( GUIDE_NUMBER ) )
          {
             String theGuideNumberStr = readGuideNumber( aParser );
-            parseGuideNumber( theGuideNumberStr, theGuideMajorNumber, theGuideMinorNumber );
+            parseGuideNumber( theGuideNumberStr, theProgram );
          }
          else if( name.equals( GUIDE_NAME ) )
          {
-            theGuideName = readGuideName( aParser );
+            String theName = readGuideName( aParser );
+            theProgram.name = theName;
+            theProgram.programString = theName;
          }
          else
          {
@@ -104,10 +105,14 @@ public class LineupXMLParser
          }
       }
       mProgramNum++;
-      return new ChannelScanProgram( theGuideName, mProgramNum, theGuideMajorNumber, theGuideMinorNumber, ChannelScanProgram.PROGRAM_VCHANNEL, theGuideName, true );
+      
+      theProgram.programNumber = mProgramNum;
+      theProgram.type = ChannelScanProgram.PROGRAM_VCHANNEL;
+          
+      return theProgram;      
    }
 
-   private void parseGuideNumber( String aGuideNumberStr, Integer aGuideMajorNumber, Integer aGuideMinorNumber )
+   private void parseGuideNumber( String aGuideNumberStr, ChannelScanProgram aProgram )
    {
       int thePointIndex = aGuideNumberStr.indexOf( '.' );
       
@@ -116,13 +121,13 @@ public class LineupXMLParser
          String theMajorNum = aGuideNumberStr.substring( 0, thePointIndex );
          String theMinorNum = aGuideNumberStr.substring( thePointIndex + 1, aGuideNumberStr.length() );
          
-         aGuideMajorNumber = Integer.parseInt( theMajorNum );
-         aGuideMinorNumber = Integer.parseInt( theMinorNum );
+         aProgram.virtualMajor = Integer.parseInt( theMajorNum );
+         aProgram.virtualMinor = Integer.parseInt( theMinorNum );
       }
       else
       {
-         aGuideMajorNumber = Integer.parseInt( aGuideNumberStr );
-         aGuideMinorNumber = 0;
+         aProgram.virtualMajor = Integer.parseInt( aGuideNumberStr );
+         aProgram.virtualMinor = 0;
       }
       
    }

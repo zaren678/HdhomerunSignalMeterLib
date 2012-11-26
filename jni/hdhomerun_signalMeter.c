@@ -725,6 +725,39 @@ JNIEXPORT jint JNICALL Java_com_zaren_HdhomerunSignalMeterLib_data_HdhomerunDevi
    return retVal;
 }
 
+JNIEXPORT jint JNICALL Java_com_zaren_HdhomerunSignalMeterLib_data_HdhomerunDevice_JNIgetVar
+  (JNIEnv * env, jobject thiz, jint cPointer, jstring javaVarString, jobject javaValueString, jobject javaErrorString)
+{
+   struct hdhomerun_device_t* device = (struct hdhomerun_device_t*)cPointer;
+   int retVal = 0;
+   
+   const char *varString = (*env)->GetStringUTFChars(env,javaVarString, 0);
+   
+   jclass jniStringsClass = (*env)->FindClass(env,"com/zaren/HdhomerunSignalMeterLib/data/JniString");
+   jmethodID setStringId = (*env)->GetMethodID(env,jniStringsClass,"setString","(Ljava/lang/String;)V");
+   
+   char pValueBuf[100];
+   char* pValuePtr = pValueBuf;
+   
+   char pErrorBuf[100];
+   char* pErrorPtr = pErrorBuf;
+   
+   MY_LOGD("C: JNIgetVar, %s\n",varString);
+   
+   retVal = hdhomerun_device_get_var(device, varString, &pValuePtr, &pErrorPtr);
+   
+   (*env)->CallVoidMethod(env, javaValueString, setStringId,
+                         (*env)->NewStringUTF(env, pValuePtr));
+                         
+   (*env)->CallVoidMethod(env, javaErrorString, setStringId,
+                         (*env)->NewStringUTF(env, pErrorPtr));                         
+   
+   MY_LOGD("C: JNIgetVar, return %d, pValue %s, pError %s\n",retVal, pValuePtr, pErrorPtr);
+   
+   (*env)->ReleaseStringUTFChars(env, javaVarString, varString);
+   return retVal;
+}
+
 JNIEXPORT jint JNICALL Java_com_zaren_HdhomerunSignalMeterLib_data_HdhomerunDevice_JNItunerLockeyRequest
   (JNIEnv * env, jobject thiz, jint cPointer, jobject javaErrorString)
 {

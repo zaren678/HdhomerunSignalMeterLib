@@ -179,6 +179,14 @@ JNIEXPORT jint JNICALL Java_com_zaren_HdhomerunSignalMeterLib_data_HdhomerunDevi
 
 /*
  * Class:     com_zaren_HdhomerunSignalMeterLib_data_HdhomerunDevice
+ * Method:    JNIgetVar
+ * Signature: (ILjava/lang/String;Lcom/zaren/HdhomerunSignalMeterLib/data/JniString;Lcom/zaren/HdhomerunSignalMeterLib/data/JniString;)I
+ */
+JNIEXPORT jint JNICALL Java_com_zaren_HdhomerunSignalMeterLib_data_HdhomerunDevice_JNIgetVar
+  (JNIEnv *, jobject, jint, jstring, jobject, jobject);
+
+/*
+ * Class:     com_zaren_HdhomerunSignalMeterLib_data_HdhomerunDevice
  * Method:    JNItunerLockeyRequest
  * Signature: (ILcom/zaren/HdhomerunSignalMeterLib/data/JniString;)I
  */

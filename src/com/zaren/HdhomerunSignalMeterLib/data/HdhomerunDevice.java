@@ -615,6 +615,12 @@ public class HdhomerunDevice implements Serializable
       return JNIsetVar(cPointer, var, value);
    }
    
+   private native int JNIgetVar(int cPointer, String var, JniString aValue, JniString aError);
+   public int getVar(String var, JniString aValue, JniString aError)
+   {
+      return JNIgetVar(cPointer, var, aValue, aError);
+   }
+   
    private native int JNItunerLockeyRequest(int cPointer, JniString error);
    public int tunerLockeyRequest(JniString error)
    {
