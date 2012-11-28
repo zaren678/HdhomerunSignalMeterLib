@@ -687,5 +687,59 @@ public class HdhomerunDevice implements Serializable
       HDHomerunLogger.d("Device: stopStreaming");
       JNIstreamStop(cPointer);
    }
+
+   public CableCardStatus getCardStatus()
+   {
+      JniString theValue = new JniString();
+      JniString theError = new JniString();
+      
+      int theStatus = getVar( "/card/status", theValue, theError );
+      
+      HDHomerunLogger.d( "getCardStatus: theStatus = " + theStatus + " theValue = " + theValue + " theError = " + theError );
+      
+      CableCardStatus theReturn = new CableCardStatus();
+      
+      if( theStatus == DeviceResponse.SUCCESS )
+      {
+         //process response
+         processCardStatus( theValue, theReturn );
+      }
+      
+      return theReturn;
+   }
+
+   private void processCardStatus( JniString aValue, CableCardStatus aReturn )
+   {
+      StringTokenizer theKeyValPairs = new StringTokenizer( aValue.getString(), " " );
+      
+      while( theKeyValPairs.hasMoreTokens() )
+      {
+         String theKeyVal = theKeyValPairs.nextToken();
+         
+         int theEqualsIndex = theKeyVal.indexOf( '=' );
+         if( theEqualsIndex != -1 )
+         {
+            String theKey = theKeyVal.substring( 0, theEqualsIndex );
+            String theVal = theKeyVal.substring( theEqualsIndex + 1, theKeyVal.length() );
+            
+            if( theKey.equals("card") )
+            {
+               aReturn.setCard( theVal );
+            }
+            else if( theKey.equals("auth") )
+            {
+               aReturn.setAuth( theVal );
+            }
+            else if( theKey.equals("oob") )
+            {
+               aReturn.setOob( theVal );
+            }
+            else if( theKey.equals("act") )
+            {
+               aReturn.setAct( theVal );
+            }
+         }
+      }
+   }
    
 } //end class HdhomerunDevice

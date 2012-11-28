@@ -21,14 +21,21 @@ public class HDHomerunLogger
    //public static final int MinimumLogLevel = 5; // Warn
    //public static final int MinimumLogLevel = 6; // Error
 
+   private static String mTag = TAG;
+   
    private static boolean logToFile = false;
    private static final long MAX_LOG_FILE_SIZE = 10000000; //10 MB
 
    // public static final int MinimumLogLevel = 7; // Assert
 
+   public static void setTag( String aTag )
+   {
+      mTag = aTag;
+   }
+   
    public static void d(String message)
    {
-      debug(TAG, message);
+      debug(mTag, message);
    }
    
    @SuppressWarnings("unused")
@@ -45,7 +52,7 @@ public class HDHomerunLogger
 
    public static void v(String message)
    {
-      verbose(TAG,message);
+      verbose(mTag,message);
    }
    
    @SuppressWarnings("unused")
@@ -62,7 +69,7 @@ public class HDHomerunLogger
 
    public static void i(String message)
    {
-      info(TAG,message);
+      info(mTag,message);
    }
    
    @SuppressWarnings("unused")
@@ -79,7 +86,7 @@ public class HDHomerunLogger
 
    public static void w(String message)
    {
-      warn(TAG,message);
+      warn(mTag,message);
    }
    
    @SuppressWarnings("unused")
@@ -96,7 +103,7 @@ public class HDHomerunLogger
 
    public static void e(String message)
    {
-      error(TAG,message);
+      error(mTag,message);
    }
    
    @SuppressWarnings("unused")
@@ -151,7 +158,7 @@ public class HDHomerunLogger
          {
             // TODO Auto-generated catch block
             e.printStackTrace();
-            Log.d(TAG, e.toString());
+            Log.d(mTag, e.toString());
          }
       }
       
@@ -177,7 +184,7 @@ public class HDHomerunLogger
             {
                // TODO Auto-generated catch block
                e.printStackTrace();
-               Log.d(TAG, e.toString());
+               Log.d(mTag, e.toString());
                return;
             }
          }

@@ -47,6 +47,7 @@ public class DeviceController
                                                                    // serializable
    private volatile String mCurrentChannelMap;
    private Context mContext;
+   private CableCardStatus mCableCardStatus;
 
    public DeviceController( HdhomerunDiscoverDevice discoverDevice, IndeterminateProgressBarInt aProgressBar, Context aContext )
    {
@@ -85,6 +86,11 @@ public class DeviceController
          }
       }, "Device: " + mDevice.getDeviceName() );
       mDeviceThread.start();
+   }
+
+   public CableCardStatus getCableCardStatus()
+   {
+      return mCableCardStatus;
    }
 
    public void initialize( final boolean aReportInitialStatus )
@@ -137,6 +143,12 @@ public class DeviceController
                {
                   notifyChannelMapChanged( theResponse, theChannelMaps[0] );
                }
+            }
+            
+            //get Card status if this is a prime device
+            if( mDevice.getDeviceType().equals( HdhomerunDevice.DEVICE_CABLECARD ) )
+            {
+               mCableCardStatus = mDevice.getCardStatus();
             }
 
             final ProgramsList thePrograms = new ProgramsList();
@@ -564,7 +576,12 @@ public class DeviceController
 
       setProgressBarBusy( true );
       
-      if( getDevice().getDeviceType().equals( HdhomerunDevice.DEVICE_CABLECARD ) )
+      //Cablecard ready means that 
+      if( getDevice().getDeviceType().equals( HdhomerunDevice.DEVICE_CABLECARD ) &&
+          getCableCardStatus().getCard().equals( CableCardStatus.READY ) && 
+          getCableCardStatus().getAuth().equals( CableCardStatus.SUCCESS ) && 
+          getCableCardStatus().getOob().equals( CableCardStatus.SUCCESS ) &&
+          getCableCardStatus().getAct().equals( CableCardStatus.SUCCESS ) )
       {
          try
          {
