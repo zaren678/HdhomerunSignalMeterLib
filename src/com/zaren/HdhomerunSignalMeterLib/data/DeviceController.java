@@ -49,7 +49,7 @@ public class DeviceController
    private Context mContext;
    private CableCardStatus mCableCardStatus;
 
-   public DeviceController( HdhomerunDiscoverDevice discoverDevice, IndeterminateProgressBarInt aProgressBar, Context aContext )
+   public DeviceController( HdhomerunDiscoverDevice discoverDevice, IndeterminateProgressBarInt aProgressBar, Context aContext ) throws HdhomerunCommErrorException
    {
       mCurrentChannelMap = "none";
       mEvents = new DeviceControllerEvents();
@@ -60,13 +60,12 @@ public class DeviceController
       mUiHandler = new Handler();
 
       setDevice( discoverDevice );
-
+   
       // Lets kick off the main thread for the hdhomerunDevice
       mDeviceThread = new Thread( new Runnable()
       {
          public void run()
          {
-
             try
             {
                Looper.prepare();
@@ -91,6 +90,15 @@ public class DeviceController
    public CableCardStatus getCableCardStatus()
    {
       return mCableCardStatus;
+   }
+   
+   public boolean isCableCardSetup()
+   {
+      return getDevice().getDeviceType().equals( HdhomerunDevice.DEVICE_CABLECARD ) &&
+            getCableCardStatus().getCard().equals( CableCardStatus.READY ) && 
+            getCableCardStatus().getAuth().equals( CableCardStatus.SUCCESS ) && 
+            getCableCardStatus().getOob().equals( CableCardStatus.SUCCESS ) &&
+            getCableCardStatus().getAct().equals( CableCardStatus.SUCCESS );
    }
 
    public void initialize( final boolean aReportInitialStatus )
@@ -395,7 +403,7 @@ public class DeviceController
       }
    }
 
-   public void setDevice( HdhomerunDiscoverDevice discoverDevice )
+   public void setDevice( HdhomerunDiscoverDevice discoverDevice ) throws HdhomerunCommErrorException
    {
       // Clean up the old HDHR Device
       if( mDevice != null )
@@ -428,12 +436,14 @@ public class DeviceController
       }
       catch( HdhomerunCommErrorException e )
       {
+         HDHomerunLogger.e( "Communications Error while setting up device" );
          if( mDevice != null )
          {
             mDevice.destroy();
             mDevice = null;
-         }
+         }         
          ErrorHandler.HandleError( "Failed to set device" );
+         throw e;
       }
    }
 

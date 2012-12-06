@@ -20,5 +20,16 @@ public class ObservableWithCheck< T > extends Observable< T > implements Seriali
          super.unregisterObserver( aObserver );
       }
    }
+
+   @Override
+   public void registerObserver( T aObserver )
+   {
+      if( !mObservers.contains( aObserver ) )
+      {
+         super.registerObserver( aObserver );
+      }
+   }
+   
+   
    
 }

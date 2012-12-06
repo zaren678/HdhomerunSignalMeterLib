@@ -170,7 +170,7 @@ public class ChannelScanRunnable implements Runnable
                thePrograms.clear();
                mDevice.getTunerStreamInfo( thePrograms );
                
-               if( mDevice.getDeviceType().equals( HdhomerunDevice.DEVICE_CABLECARD ) )
+               if( mCntrl.isCableCardSetup() )
                {
                   for( ChannelScanProgram theProgram : thePrograms )
                   {
