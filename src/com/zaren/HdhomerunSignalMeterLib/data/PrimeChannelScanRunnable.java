@@ -62,9 +62,12 @@ public class PrimeChannelScanRunnable implements Runnable
          //now process the xml
          ProgramsList thePrograms = processChannelList();
          
+         HDHomerunLogger.d( "PrimeChannelScanRunnable: Num programs found is " + thePrograms.size() );
+         
          if( mDeviceController != null )
          {
             //send program list changed
+            HDHomerunLogger.d( "PrimeChannelScanRunnable: Notifying Program List Changed" );
             mDeviceController.notifyObserversProgramListChanged( thePrograms, -1 );
          }
       }
@@ -224,12 +227,14 @@ public class PrimeChannelScanRunnable implements Runnable
          
          HttpClient httpClient = new DefaultHttpClient();
          HttpGet pageGet = new HttpGet( aLineupUrl.toURI() );
-         HttpResponse response = httpClient.execute( pageGet );
+         HttpResponse response = httpClient.execute( pageGet );                  
          
          theInputStream = response.getEntity().getContent();
       }
       else
       {
+         HDHomerunLogger.d( "DownloadChannelList: Using HttpURLConnection client" );
+         
          HttpURLConnection urlConnection = (HttpURLConnection) aLineupUrl.openConnection();
    
          urlConnection.setRequestMethod( "GET" );
@@ -246,19 +251,20 @@ public class PrimeChannelScanRunnable implements Runnable
 
       //int totalSize = urlConnection.getContentLength();
 
-      //int downloadedSize = 0;
+      int downloadedSize = 0;
 
       byte[] buffer = new byte[1024];
       int bufferLength = 0; // used to store a temporary size of the buffer
 
       while( ( bufferLength = theInputStream.read( buffer ) ) > 0 )
       {
-
          fileOutput.write( buffer, 0, bufferLength );
 
-         //downloadedSize += bufferLength;
+         downloadedSize += bufferLength;
       }
 
+      HDHomerunLogger.d( "DownloadChannelList: total download size " + downloadedSize );
+      
       fileOutput.close();
    }
 

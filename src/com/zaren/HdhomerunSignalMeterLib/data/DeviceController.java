@@ -94,11 +94,20 @@ public class DeviceController
    
    public boolean isCableCardSetup()
    {
+      CableCardStatus theStatus = getCableCardStatus();
+                  
+      if( theStatus == null )
+      {
+         return false;
+      }
+      
+      HDHomerunLogger.d( "isCableCardSetup(): " + theStatus );
+      
       return getDevice().getDeviceType().equals( HdhomerunDevice.DEVICE_CABLECARD ) &&
-            getCableCardStatus().getCard().equals( CableCardStatus.READY ) && 
-            getCableCardStatus().getAuth().equals( CableCardStatus.SUCCESS ) && 
-            getCableCardStatus().getOob().equals( CableCardStatus.SUCCESS ) &&
-            getCableCardStatus().getAct().equals( CableCardStatus.SUCCESS );
+            theStatus.getCard().equals( CableCardStatus.READY ) && 
+            theStatus.getAuth().equals( CableCardStatus.SUCCESS ) && 
+            theStatus.getOob().equals( CableCardStatus.SUCCESS ) &&
+            theStatus.getAct().equals( CableCardStatus.SUCCESS );
    }
 
    public void initialize( final boolean aReportInitialStatus )
@@ -584,21 +593,21 @@ public class DeviceController
          return;
       }
 
-      setProgressBarBusy( true );
+      HDHomerunLogger.d( "Full Channel scan" );
       
-      //Cablecard ready means that 
-      if( getDevice().getDeviceType().equals( HdhomerunDevice.DEVICE_CABLECARD ) &&
-          getCableCardStatus().getCard().equals( CableCardStatus.READY ) && 
-          getCableCardStatus().getAuth().equals( CableCardStatus.SUCCESS ) && 
-          getCableCardStatus().getOob().equals( CableCardStatus.SUCCESS ) &&
-          getCableCardStatus().getAct().equals( CableCardStatus.SUCCESS ) )
+      setProgressBarBusy( true );
+             
+      if( isCableCardSetup() )
       {
+         HDHomerunLogger.d( "Full Channel scan: Cablecard is setup" );
          try
          {
             int theIpVal = getDevice().getIpAddr();
             String theIpAddr = Utils.HdHrIpAddressToString( theIpVal );
    
-            URL theUrl = new URL( "http://"+ theIpAddr + "/lineup.xml?show=unprotected" );            
+            URL theUrl = new URL( "http://"+ theIpAddr + "/lineup.xml?show=unprotected" );
+            
+            HDHomerunLogger.d( "Full Channel scan: URL is " + theUrl );
             
             mDeviceHandler.post(  new PrimeChannelScanRunnable( this, mContext, theUrl ) );
          }
@@ -611,6 +620,7 @@ public class DeviceController
       }
       else
       {
+         HDHomerunLogger.d( "Full Channel scan: Cablecard is not setup" );
          mChannelScanTask = new ChannelScanRunnable( this, mChannelList );
          mDeviceHandler.post( mChannelScanTask );
       }
