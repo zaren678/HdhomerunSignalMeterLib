@@ -6,6 +6,7 @@ public class CableCardStatus
    public static final String NONE = "none";
    public static final String SUCCESS = "success";
    public static final String FAILURE = "failure";
+   public static final String OOB_WEAK = "weak";
    
    private String mCard = "none";
    private String mAuth = "failure";

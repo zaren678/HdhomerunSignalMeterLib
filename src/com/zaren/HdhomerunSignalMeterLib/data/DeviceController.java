@@ -106,7 +106,8 @@ public class DeviceController
       return getDevice().getDeviceType().equals( HdhomerunDevice.DEVICE_CABLECARD ) &&
             theStatus.getCard().equals( CableCardStatus.READY ) && 
             theStatus.getAuth().equals( CableCardStatus.SUCCESS ) && 
-            theStatus.getOob().equals( CableCardStatus.SUCCESS ) &&
+            ( theStatus.getOob().equals( CableCardStatus.SUCCESS ) ||
+              theStatus.getOob().equals( CableCardStatus.OOB_WEAK ) ) &&
             theStatus.getAct().equals( CableCardStatus.SUCCESS );
    }
 

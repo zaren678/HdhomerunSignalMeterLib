@@ -118,6 +118,11 @@ public class HDHomerunLogger
       }
    }
 
+   public static String getLogFilePath()
+   {
+      return Environment.getExternalStorageDirectory() + "/" + "hdhomerun-signal-meter.log";
+   }
+   
    private synchronized static void writeToLogFile(String Tag, String message)
    {
       // Make the necessary directories if needed.
@@ -147,7 +152,7 @@ public class HDHomerunLogger
          return;
       }
       
-      File logFile = new File(root,"hdhomerun-signal-meter.log");
+      File logFile = new File( getLogFilePath() );
       if (!logFile.exists())
       {
          try
@@ -206,6 +211,13 @@ public class HDHomerunLogger
    public static void setDebugToFile(boolean debugToFile)
    {
       HDHomerunLogger.i("Debug to file set to " + debugToFile);
+      
+      if( debugToFile )
+      {
+         //if switching to true delete the old file
+         File theLogFile = new File( getLogFilePath() );
+         theLogFile.delete();
+      }
       logToFile = debugToFile;
    }
 }
