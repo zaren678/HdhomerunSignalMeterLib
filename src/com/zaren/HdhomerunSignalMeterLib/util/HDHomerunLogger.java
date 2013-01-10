@@ -1,5 +1,8 @@
 package com.zaren.HdhomerunSignalMeterLib.util;
 
+import android.os.Environment;
+import android.util.Log;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -7,9 +10,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
-
-import android.os.Environment;
-import android.util.Log;
 
 public class HDHomerunLogger
 {
@@ -211,7 +211,7 @@ public class HDHomerunLogger
    public static void setDebugToFile(boolean debugToFile)
    {
       HDHomerunLogger.i("Debug to file set to " + debugToFile);
-      
+
       if( debugToFile )
       {
          //if switching to true delete the old file
