@@ -164,6 +164,7 @@ public class HDHomerunLogger
             // TODO Auto-generated catch block
             e.printStackTrace();
             Log.d(mTag, e.toString());
+            return;
          }
       }
       
