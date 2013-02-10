@@ -1,11 +1,14 @@
 package com.zaren.HdhomerunSignalMeterLib.data;
 
-import java.io.Serializable;
-import java.util.NoSuchElementException;
-import java.util.StringTokenizer;
 import com.zaren.HdhomerunSignalMeterLib.util.ErrorHandler;
 import com.zaren.HdhomerunSignalMeterLib.util.HDHomerunLogger;
 import com.zaren.HdhomerunSignalMeterLib.util.Utils;
+
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.StringTokenizer;
 
 public class HdhomerunDevice implements Serializable
 {
@@ -235,7 +238,7 @@ public class HdhomerunDevice implements Serializable
                theProgramString = theProgramStrings.nextToken();
             }
             
-            //HDHomerunLogger.d( "Parsing program string: " + theProgramString );
+            HDHomerunLogger.d( "Parsing program string: " + theProgramString );
             
             StringTokenizer theProgNumAndName = new StringTokenizer( theProgramString, ":" );                  
             
@@ -262,6 +265,7 @@ public class HdhomerunDevice implements Serializable
       }
    }
 
+   private static final String[] theTypes = new String[]{ "control", "encrypted", "no data", "internet"};
    private void processProgramName( String aProgramName, ChannelScanProgram aProgram )
    {
       int theOpeningParen = aProgramName.indexOf( "(" );
@@ -273,8 +277,13 @@ public class HdhomerunDevice implements Serializable
       {
          //This is the string that says "control" or "encrypted" or "no data"
          String theTypeString = aProgramName.substring( theOpeningParen + 1, theClosingParen );
-         aProgram.type = theTypeString;
-         theJustProgramName = aProgramName.substring( 0, theOpeningParen );
+         List< String > theTypeStrings = Arrays.asList( theTypes );
+
+         if( theTypeStrings.contains( theTypeString ) )
+         {
+            aProgram.type = theTypeString;
+            theJustProgramName = aProgramName.substring( 0, theOpeningParen );
+         }
       }
       
       StringTokenizer theStrings = new StringTokenizer( theJustProgramName, " " );                  
