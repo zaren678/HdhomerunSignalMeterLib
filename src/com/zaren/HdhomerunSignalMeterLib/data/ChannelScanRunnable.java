@@ -147,6 +147,9 @@ public class ChannelScanRunnable implements Runnable
             if( theResponse.getStatus() != DeviceResponse.SUCCESS )
             {
                HDHomerunLogger.d( "Fail to set channel to auto:" + theCurrentChannel );
+
+               //this happens alot at the end of us cable channel scans, don't mark as error
+               theResponse.setStatus( DeviceResponse.SUCCESS );
                                        
                if( checkForEnd( theCurrentChannel ) )
                {
