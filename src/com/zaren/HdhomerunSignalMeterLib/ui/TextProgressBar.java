@@ -45,34 +45,41 @@ public class TextProgressBar extends ProgressBar
         bounds = new Rect();
 	}
 
-	@Override
-	protected synchronized void onDraw(Canvas canvas) 
-	{
-		super.onDraw(canvas);
-		
-        textPaint.getTextBounds(text, 0, text.length(), bounds);  
-        int x = getWidth() / 2 - bounds.centerX();  
-        int y = getHeight() / 2 - bounds.centerY();  
-        canvas.drawText(text, x, y, textPaint);  
-	}
+   @Override
+   protected synchronized void onDraw(Canvas canvas)
+   {
+      super.onDraw(canvas);
 
-	public synchronized void setText(String text) 
-	{  
-        this.text = text;  
-        drawableStateChanged();  
-    }  
+      textPaint.getTextBounds(text, 0, text.length(), bounds);
+
+      int x = getWidth() / 2 - bounds.centerX();
+      int y = getHeight() / 2 - bounds.centerY();
+      canvas.drawText(text, x, y, textPaint);
+   }
+
+   public synchronized void setText(String text)
+   {
+      this.text = text;
+      drawableStateChanged();
+   }
   
-    public void setTextColor(int color) 
-    {  
-        textPaint.setColor(color);  
-        drawableStateChanged();  
-    }
+   public void setTextColor(int color)
+   {
+      textPaint.setColor(color);
+      drawableStateChanged();
+   }
+
+   public void setTextSize( float aSize )
+   {
+      textPaint.setTextSize( aSize );
+      drawableStateChanged();
+   }
     
-    protected void setProgressBarColor( Drawable aProgBarDrawable ) 
-    {
-       Rect bounds = getProgressDrawable().getBounds();
-       setProgressDrawable(aProgBarDrawable);
-       getProgressDrawable().setBounds(bounds);
-    }
+   protected void setProgressBarColor( Drawable aProgBarDrawable )
+   {
+      Rect bounds = getProgressDrawable().getBounds();
+      setProgressDrawable(aProgBarDrawable);
+      getProgressDrawable().setBounds(bounds);
+   }
     
 }
