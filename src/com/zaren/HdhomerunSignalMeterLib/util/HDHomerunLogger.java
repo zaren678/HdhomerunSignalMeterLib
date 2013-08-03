@@ -161,8 +161,6 @@ public class HDHomerunLogger
          }
          catch (IOException e)
          {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
             Log.d(mTag, e.toString());
             return;
          }

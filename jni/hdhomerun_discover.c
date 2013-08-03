@@ -362,7 +362,7 @@ int hdhomerun_discover_find_devices(struct hdhomerun_discover_t *ds, uint32_t ta
 
 	int count = 0;
 	int attempt;
-	for (attempt = 0; attempt < 2; attempt++) {
+	for (attempt = 0; attempt < 5; attempt++) {
 		if (!hdhomerun_discover_send(ds, target_ip, device_type, device_id)) {
          MY_LOGD("hdhomerun_discover_find_devices(): Failed to send");
 			return -1;

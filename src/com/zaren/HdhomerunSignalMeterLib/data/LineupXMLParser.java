@@ -1,13 +1,12 @@
 package com.zaren.HdhomerunSignalMeterLib.data;
 
-import java.io.IOException;
-import java.io.InputStream;
+import android.util.Xml;
+import com.zaren.HdhomerunSignalMeterLib.util.HDHomerunLogger;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import com.zaren.HdhomerunSignalMeterLib.util.HDHomerunLogger;
-
-import android.util.Xml;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class LineupXMLParser
 {
@@ -129,25 +128,14 @@ public class LineupXMLParser
          aProgram.virtualMajor = Integer.parseInt( aGuideNumberStr );
          aProgram.virtualMinor = 0;
       }
-      
    }
 
    private String readGuideNumber( XmlPullParser aParser ) throws IOException, XmlPullParserException
    {
-      String theGuideNumber = "";
-      
-      try
-      {
-         aParser.require( XmlPullParser.START_TAG, ns, GUIDE_NUMBER );
-         theGuideNumber = readText( aParser );
-         aParser.require( XmlPullParser.END_TAG, ns, GUIDE_NUMBER );         
-      }
-      catch( NumberFormatException e )
-      {
-         HDHomerunLogger.e( "Couldn't parse guide number " + e );         
-      }
-      
-      return theGuideNumber;
+        aParser.require( XmlPullParser.START_TAG, ns, GUIDE_NUMBER );
+        String theGuideNumber = readText( aParser );
+        aParser.require( XmlPullParser.END_TAG, ns, GUIDE_NUMBER );
+        return theGuideNumber;
    }
    
    private String readGuideName( XmlPullParser aParser ) throws IOException, XmlPullParserException

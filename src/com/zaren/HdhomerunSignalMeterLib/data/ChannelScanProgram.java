@@ -18,7 +18,7 @@ public class ChannelScanProgram implements Serializable
    public int virtualMinor = 0;
    public String type = PROGRAM_NORMAL;
    public String name = "";
-   boolean mIsSubscribed = true;
+   public boolean mIsSubscribed = true;
    
    public ChannelScanProgram()
    {
