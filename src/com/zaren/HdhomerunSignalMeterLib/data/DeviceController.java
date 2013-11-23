@@ -1,19 +1,18 @@
 package com.zaren.HdhomerunSignalMeterLib.data;
 
-import java.net.InetAddress;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.UnknownHostException;
-
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-
 import com.zaren.HdhomerunSignalMeterLib.events.DeviceControllerEvents;
 import com.zaren.HdhomerunSignalMeterLib.ui.IndeterminateProgressBarInt;
 import com.zaren.HdhomerunSignalMeterLib.util.ErrorHandler;
 import com.zaren.HdhomerunSignalMeterLib.util.HDHomerunLogger;
 import com.zaren.HdhomerunSignalMeterLib.util.Utils;
+
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.UnknownHostException;
 
 /**
  * this class will monitor signal strength and perform higher level functions
@@ -107,8 +106,7 @@ public class DeviceController
             theStatus.getCard().equals( CableCardStatus.READY ) && 
             theStatus.getAuth().equals( CableCardStatus.SUCCESS ) && 
             ( theStatus.getOob().equals( CableCardStatus.SUCCESS ) ||
-              theStatus.getOob().equals( CableCardStatus.OOB_WEAK ) ) &&
-            theStatus.getAct().equals( CableCardStatus.SUCCESS );
+              theStatus.getOob().equals( CableCardStatus.OOB_WEAK ) );
    }
 
    public void initialize( final boolean aReportInitialStatus )
