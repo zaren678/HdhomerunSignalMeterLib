@@ -804,7 +804,8 @@ public class DeviceController
             {
                 String theProgram = mProgram + "";
 
-                if( mDevice.getTranscodeProfiles() != null )
+                if( mDevice.getTranscodeProfiles() != null &&
+                    mTranscodeProfile != null )
                 {
                     theProgram += " transcode=" + mTranscodeProfile;
                 }
