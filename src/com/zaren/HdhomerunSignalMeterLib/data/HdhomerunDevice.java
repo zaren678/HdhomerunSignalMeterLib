@@ -15,16 +15,19 @@ public class HdhomerunDevice implements Serializable
     private static final long serialVersionUID = 1942906208628106963L;
     public static final String DEVICE_CABLECARD = "cablecard";
     public static final String DEVICE_ATSC = "atsc";
+    public static final String DEVICE_TC_ATSC = "tc_atsc";
 
     //reset constants
     public static final String SELF = "self";
     public static final String CABLECARD = "cablecard";
+
 
     private int cPointer;
     private long deviceId;
     private int ipAddr;
     private int tuner;
     private String[] channelMaps;
+    private String[] transcodeProfiles;
     private String deviceName;
     private TunerStatus prevTunerStatus;
     private String prevChannelMap;
@@ -74,6 +77,10 @@ public class HdhomerunDevice implements Serializable
         {
             deviceType = DEVICE_CABLECARD;
         }
+        else if( deviceModel.equals( "hdhomeruntc_atsc" ) )
+        {
+            deviceType = DEVICE_TC_ATSC;
+        }
         else
         {
             deviceType = DEVICE_ATSC;
@@ -109,6 +116,16 @@ public class HdhomerunDevice implements Serializable
             else if( key.equals( "auto-modulation:" ) )
             {
                 // don't care about this yet
+            }
+            else if( key.equals( "transcode:" ) )
+            {
+                int i = 0; // just a counter
+                transcodeProfiles = new String[ st.countTokens() ];
+                while( st.hasMoreTokens() == true )
+                {
+                    transcodeProfiles[ i ] = st.nextToken();
+                    i++;
+                }
             }
             else
             {
@@ -373,6 +390,14 @@ public class HdhomerunDevice implements Serializable
     public String[] getChannelMaps()
     {
         return channelMaps;
+    }
+
+    /**
+     * @return the transcode profiles
+     */
+    public String[] getTranscodeProfiles()
+    {
+        return transcodeProfiles;
     }
 
     synchronized public String getCurrentChannelMap()

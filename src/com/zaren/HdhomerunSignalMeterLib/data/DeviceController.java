@@ -107,6 +107,11 @@ public class DeviceController
                 ( theStatus.getOob().equals( CableCardStatus.SUCCESS ) || theStatus.getOob().equals( CableCardStatus.OOB_WEAK ) );
     }
 
+    public boolean canTranscode()
+    {
+        return mDevice.getTranscodeProfiles() != null;
+    }
+
     public void initialize( final boolean aReportInitialStatus )
     {
         mDeviceHandler.post( new Runnable()
@@ -471,7 +476,8 @@ public class DeviceController
             return;
         }
 
-        if( mDevice.getDeviceType().equals( HdhomerunDevice.DEVICE_ATSC ) )
+        String theDeviceType = mDevice.getDeviceType();
+        if( theDeviceType.equals( HdhomerunDevice.DEVICE_ATSC ) )
         {
             try
             {
@@ -494,8 +500,8 @@ public class DeviceController
                 HDHomerunLogger.e( "setTunerChannel: Failed to parse channel: " + e );
             }
         }
-
-        else if( ( mDevice.getDeviceType().equals( HdhomerunDevice.DEVICE_CABLECARD ) ) )
+        else if( theDeviceType.equals( HdhomerunDevice.DEVICE_CABLECARD ) ||
+                 theDeviceType.equals( HdhomerunDevice.DEVICE_TC_ATSC ) )
         {
             if( aIsVirtualTune == true )
             {
@@ -710,6 +716,11 @@ public class DeviceController
 
     public void setProgram( int aProgramNumber )
     {
+        setProgram( aProgramNumber, null );
+    }
+
+    public void setProgram( int aProgramNumber, String aTranscodeProfile )
+    {
         if( mDevice == null )
         {
             ErrorHandler.HandleError( "No Device Set" );
@@ -728,7 +739,7 @@ public class DeviceController
         }
 
         setProgressBarBusy( true );
-        mDeviceHandler.post( new SetProgramRunnable( aProgramNumber ) );
+        mDeviceHandler.post( new SetProgramRunnable( aProgramNumber, aTranscodeProfile ) );
     }
 
     /**
@@ -736,11 +747,13 @@ public class DeviceController
      */
     public class SetProgramRunnable implements Runnable
     {
+        private final String mTranscodeProfile;
         private int mProgram;
 
-        public SetProgramRunnable( int aProgramNumber )
+        public SetProgramRunnable( int aProgramNumber, String aTrancodeProfile )
         {
             mProgram = aProgramNumber;
+            mTranscodeProfile = aTrancodeProfile;
         }
 
         /*
@@ -789,7 +802,14 @@ public class DeviceController
 
             if( theStatus > 0 )
             {
-                mDevice.setTunerProgram( mProgram + "" );
+                String theProgram = mProgram + "";
+
+                if( mDevice.getTranscodeProfiles() != null )
+                {
+                    theProgram += " transcode=" + mTranscodeProfile;
+                }
+
+                mDevice.setTunerProgram( theProgram );
                 mDevice.tunerLockeyRelease();
 
                 notifyObserversProgramChanged( theResponse, theNewProgram );
