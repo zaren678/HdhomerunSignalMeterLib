@@ -3,10 +3,10 @@
  *
  * Copyright © 2009-2010 Silicondust USA Inc. <www.silicondust.com>.
  *
- * This library is free software; you can redistribute it and/or 
+ * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 3 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -14,20 +14,8 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
- * 
- * As a special exception to the GNU Lesser General Public License,
- * you may link, statically or dynamically, an application with a
- * publicly distributed version of the Library to produce an
- * executable file containing portions of the Library, and
- * distribute that executable file under terms of your choice,
- * without any of the additional requirements listed in clause 4 of
- * the GNU Lesser General Public License.
- * 
- * By "a publicly distributed version of the Library", we mean
- * either the unmodified Library as distributed by Silicondust, or a
- * modified version of the Library that is distributed under the
- * conditions defined in the GNU Lesser General Public License.
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "hdhomerun.h"
@@ -201,7 +189,7 @@ int hdhomerun_device_selector_load_from_windows_registry(struct hdhomerun_device
 
 		/* Create and add device. */
 		char device_name[32];
-		sprintf(device_name, "%S", wdevice_name);
+		hdhomerun_sprintf(device_name, device_name + sizeof(device_name), "%S", wdevice_name);
 
 		struct hdhomerun_device_t *hd = hdhomerun_device_create_from_str(device_name, hds->dbg);
 		if (!hd) {
@@ -258,9 +246,9 @@ static bool_t hdhomerun_device_selector_choose_test(struct hdhomerun_device_sele
 		*ptr = 0;
 	}
 
-	unsigned long a[4];
-	unsigned long target_port;
-	if (sscanf(target, "%lu.%lu.%lu.%lu:%lu", &a[0], &a[1], &a[2], &a[3], &target_port) != 5) {
+	unsigned int a[4];
+	unsigned int target_port;
+	if (sscanf(target, "%u.%u.%u.%u:%u", &a[0], &a[1], &a[2], &a[3], &target_port) != 5) {
 		hdhomerun_debug_printf(hds->dbg, "hdhomerun_device_selector_choose_test: device %s in use, no target set (%s)\n", name, target);
 		return FALSE;
 	}

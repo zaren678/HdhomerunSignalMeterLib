@@ -3,10 +3,10 @@
  *
  * Copyright © 2006-2010 Silicondust USA Inc. <www.silicondust.com>.
  *
- * This library is free software; you can redistribute it and/or 
+ * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 3 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -14,20 +14,8 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
- * 
- * As a special exception to the GNU Lesser General Public License,
- * you may link, statically or dynamically, an application with a
- * publicly distributed version of the Library to produce an
- * executable file containing portions of the Library, and
- * distribute that executable file under terms of your choice,
- * without any of the additional requirements listed in clause 4 of
- * the GNU Lesser General Public License.
- * 
- * By "a publicly distributed version of the Library", we mean
- * either the unmodified Library as distributed by Silicondust, or a
- * modified version of the Library that is distributed under the
- * conditions defined in the GNU Lesser General Public License.
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "hdhomerun.h"
@@ -368,12 +356,20 @@ int hdhomerun_control_upgrade(struct hdhomerun_control_sock_t *cs, FILE *upgrade
 {
 	struct hdhomerun_pkt_t *tx_pkt = &cs->tx_pkt;
 	struct hdhomerun_pkt_t *rx_pkt = &cs->rx_pkt;
+	bool_t upload_delay = FALSE;
 	uint32_t sequence = 0;
+
+	/* Special case detection. */
+	char *version_str;
+	int ret = hdhomerun_control_get(cs, "/sys/version", &version_str, NULL);
+	if (ret > 0) {
+		upload_delay = strcmp(version_str, "20120704beta1") == 0;
+	}
 
 	/* Upload. */
 	while (1) {
-		uint8_t data[256];
-		size_t length = fread(data, 1, 256, upgrade_file);
+		uint8_t data[1024];
+		size_t length = fread(data, 1, 1024, upgrade_file);
 		if (length == 0) {
 			break;
 		}
@@ -388,6 +384,10 @@ int hdhomerun_control_upgrade(struct hdhomerun_control_sock_t *cs, FILE *upgrade
 		}
 
 		sequence += (uint32_t)length;
+
+		if (upload_delay) {
+			msleep_approx(25);
+		}
 	}
 
 	if (sequence == 0) {

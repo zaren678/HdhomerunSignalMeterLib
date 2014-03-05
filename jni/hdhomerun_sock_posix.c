@@ -3,10 +3,10 @@
  *
  * Copyright © 2010 Silicondust USA Inc. <www.silicondust.com>.
  *
- * This library is free software; you can redistribute it and/or 
+ * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 3 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -14,20 +14,8 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
- * 
- * As a special exception to the GNU Lesser General Public License,
- * you may link, statically or dynamically, an application with a
- * publicly distributed version of the Library to produce an
- * executable file containing portions of the Library, and
- * distribute that executable file under terms of your choice,
- * without any of the additional requirements listed in clause 4 of
- * the GNU Lesser General Public License.
- * 
- * By "a publicly distributed version of the Library", we mean
- * either the unmodified Library as distributed by Silicondust, or a
- * modified version of the Library that is distributed under the
- * conditions defined in the GNU Lesser General Public License.
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 /*
@@ -101,10 +89,23 @@ int hdhomerun_local_ip_info(struct hdhomerun_local_ip_info_t ip_info_list[], int
 	char *end = ifc.ifc_buf + ifc.ifc_len;
 
 	int count = 0;
-	while (ptr <= end) {
+	while (ptr < end) {
 		struct ifreq *ifr = (struct ifreq *)ptr;
 		ptr += _SIZEOF_ADDR_IFREQ(*ifr);
 
+		/* Flags. */
+		if (ioctl(sock, SIOCGIFFLAGS, ifr) != 0) {
+			continue;
+		}
+
+		if ((ifr->ifr_flags & IFF_UP) == 0) {
+			continue;
+		}
+		if ((ifr->ifr_flags & IFF_RUNNING) == 0) {
+			continue;
+		}
+
+		/* Local IP address. */
 		if (ioctl(sock, SIOCGIFADDR, ifr) != 0) {
 			continue;
 		}
@@ -115,6 +116,7 @@ int hdhomerun_local_ip_info(struct hdhomerun_local_ip_info_t ip_info_list[], int
 			continue;
 		}
 
+		/* Subnet mask. */
 		if (ioctl(sock, SIOCGIFNETMASK, ifr) != 0) {
 			continue;
 		}
@@ -122,13 +124,14 @@ int hdhomerun_local_ip_info(struct hdhomerun_local_ip_info_t ip_info_list[], int
 		struct sockaddr_in *subnet_mask_in = (struct sockaddr_in *)&(ifr->ifr_addr);
 		uint32_t subnet_mask = ntohl(subnet_mask_in->sin_addr.s_addr);
 
-		struct hdhomerun_local_ip_info_t *ip_info = &ip_info_list[count++];
-		ip_info->ip_addr = ip_addr;
-		ip_info->subnet_mask = subnet_mask;
-
-		if (count >= max_count) {
-			break;
+		/* Report. */
+		if (count < max_count) {
+			struct hdhomerun_local_ip_info_t *ip_info = &ip_info_list[count];
+			ip_info->ip_addr = ip_addr;
+			ip_info->subnet_mask = subnet_mask;
 		}
+
+		count++;
 	}
 
 	free(ifc.ifc_buf);
@@ -291,79 +294,26 @@ bool_t hdhomerun_sock_bind(hdhomerun_sock_t sock, uint32_t local_addr, uint16_t 
 	return TRUE;
 }
 
-static bool_t hdhomerun_sock_wait_for_read_event(hdhomerun_sock_t sock, uint64_t stop_time)
+static bool_t hdhomerun_sock_wait_for_event(hdhomerun_sock_t sock, short event_type, uint64_t stop_time)
 {
 	uint64_t current_time = getcurrenttime();
 	if (current_time >= stop_time) {
 		return FALSE;
 	}
 
-	if (sock < FD_SETSIZE) {
-		uint64_t timeout = stop_time - current_time;
-		struct timeval t;
-		t.tv_sec = timeout / 1000;
-		t.tv_usec = (timeout % 1000) * 1000;
+	struct pollfd poll_event;
+	poll_event.fd = sock;
+	poll_event.events = event_type;
+	poll_event.revents = 0;
 
-		fd_set readfds;
-		FD_ZERO(&readfds);
-		FD_SET(sock, &readfds);
+	uint64_t timeout = stop_time - current_time;
 
-		fd_set errorfds;
-		FD_ZERO(&errorfds);
-		FD_SET(sock, &errorfds);
-
-		if (select(sock + 1, &readfds, NULL, &errorfds, &t) <= 0) {
-			return FALSE;
-		}
-		if (!FD_ISSET(sock, &readfds)) {
-			return FALSE;
-		}
-	} else {
-		uint64_t delay = stop_time - current_time;
-		if (delay > 5) {
-			delay = 5;
-		}
-
-		msleep_approx(delay);
-	}
-
-	return TRUE;
-}
-
-static bool_t hdhomerun_sock_wait_for_write_event(hdhomerun_sock_t sock, uint64_t stop_time)
-{
-	uint64_t current_time = getcurrenttime();
-	if (current_time >= stop_time) {
+	if (poll(&poll_event, 1, (int)timeout) <= 0) {
 		return FALSE;
 	}
 
-	if (sock < FD_SETSIZE) {
-		uint64_t timeout = stop_time - current_time;
-		struct timeval t;
-		t.tv_sec = timeout / 1000;
-		t.tv_usec = (timeout % 1000) * 1000;
-
-		fd_set writefds;
-		FD_ZERO(&writefds);
-		FD_SET(sock, &writefds);
-
-		fd_set errorfds;
-		FD_ZERO(&errorfds);
-		FD_SET(sock, &errorfds);
-
-		if (select(sock + 1, NULL, &writefds, &errorfds, &t) <= 0) {
-			return FALSE;
-		}
-		if (!FD_ISSET(sock, &writefds)) {
-			return FALSE;
-		}
-	} else {
-		uint64_t delay = stop_time - current_time;
-		if (delay > 5) {
-			delay = 5;
-		}
-
-		msleep_approx(delay);
+	if ((poll_event.revents & event_type) == 0) {
+		return FALSE;
 	}
 
 	return TRUE;
@@ -384,20 +334,7 @@ bool_t hdhomerun_sock_connect(hdhomerun_sock_t sock, uint32_t remote_addr, uint1
 	}
 
 	uint64_t stop_time = getcurrenttime() + timeout;
-
-	while (1) {
-		if (send(sock, NULL, 0, MSG_NOSIGNAL) == 0) {
-			return TRUE;
-		}
-
-		if ((errno != EAGAIN) && (errno != EWOULDBLOCK) && (errno != EINPROGRESS) && (errno != ENOTCONN)) {
-			return FALSE;
-		}
-
-		if (!hdhomerun_sock_wait_for_write_event(sock, stop_time)) {
-			return FALSE;
-		}
-	}
+	return hdhomerun_sock_wait_for_event(sock, POLLOUT, stop_time);
 }
 
 bool_t hdhomerun_sock_send(hdhomerun_sock_t sock, const void *data, size_t length, uint64_t timeout)
@@ -411,7 +348,7 @@ bool_t hdhomerun_sock_send(hdhomerun_sock_t sock, const void *data, size_t lengt
 			if ((errno != EAGAIN) && (errno != EWOULDBLOCK) && (errno != EINPROGRESS)) {
 				return FALSE;
 			}
-			if (!hdhomerun_sock_wait_for_write_event(sock, stop_time)) {
+			if (!hdhomerun_sock_wait_for_event(sock, POLLOUT, stop_time)) {
 				return FALSE;
 			}
 			continue;
@@ -444,7 +381,7 @@ bool_t hdhomerun_sock_sendto(hdhomerun_sock_t sock, uint32_t remote_addr, uint16
 			if ((errno != EAGAIN) && (errno != EWOULDBLOCK) && (errno != EINPROGRESS)) {
 				return FALSE;
 			}
-			if (!hdhomerun_sock_wait_for_write_event(sock, stop_time)) {
+			if (!hdhomerun_sock_wait_for_event(sock, POLLOUT, stop_time)) {
 				return FALSE;
 			}
 			continue;
@@ -470,7 +407,7 @@ bool_t hdhomerun_sock_recv(hdhomerun_sock_t sock, void *data, size_t *length, ui
 			if ((errno != EAGAIN) && (errno != EWOULDBLOCK) && (errno != EINPROGRESS)) {
 				return FALSE;
 			}
-			if (!hdhomerun_sock_wait_for_read_event(sock, stop_time)) {
+			if (!hdhomerun_sock_wait_for_event(sock, POLLIN, stop_time)) {
 				return FALSE;
 			}
 			continue;
@@ -499,7 +436,7 @@ bool_t hdhomerun_sock_recvfrom(hdhomerun_sock_t sock, uint32_t *remote_addr, uin
 			if ((errno != EAGAIN) && (errno != EWOULDBLOCK) && (errno != EINPROGRESS)) {
 				return FALSE;
 			}
-			if (!hdhomerun_sock_wait_for_read_event(sock, stop_time)) {
+			if (!hdhomerun_sock_wait_for_event(sock, POLLIN, stop_time)) {
 				return FALSE;
 			}
 			continue;

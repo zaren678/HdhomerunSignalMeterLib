@@ -3,10 +3,10 @@
  *
  * Copyright © 2006-2010 Silicondust USA Inc. <www.silicondust.com>.
  *
- * This library is free software; you can redistribute it and/or 
+ * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 3 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -14,20 +14,8 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
- * 
- * As a special exception to the GNU Lesser General Public License,
- * you may link, statically or dynamically, an application with a
- * publicly distributed version of the Library to produce an
- * executable file containing portions of the Library, and
- * distribute that executable file under terms of your choice,
- * without any of the additional requirements listed in clause 4 of
- * the GNU Lesser General Public License.
- * 
- * By "a publicly distributed version of the Library", we mean
- * either the unmodified Library as distributed by Silicondust, or a
- * modified version of the Library that is distributed under the
- * conditions defined in the GNU Lesser General Public License.
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "hdhomerun.h"
@@ -46,6 +34,7 @@ struct hdhomerun_discover_t {
 	unsigned int sock_count;
 	struct hdhomerun_pkt_t tx_pkt;
 	struct hdhomerun_pkt_t rx_pkt;
+	struct hdhomerun_debug_t *dbg;
 };
 
 static bool_t hdhomerun_discover_sock_add(struct hdhomerun_discover_t *ds, uint32_t local_ip, uint32_t subnet_mask)
@@ -61,21 +50,22 @@ static bool_t hdhomerun_discover_sock_add(struct hdhomerun_discover_t *ds, uint3
 	}
 
 	if (ds->sock_count >= HDHOMERUN_DISOCVER_MAX_SOCK_COUNT) {
-      MY_LOGD("hdhomerun_discover_sock_add(): already at max discover sockets");
+        MY_LOGD("hdhomerun_discover_sock_add(): already at max discover sockets");
 		return FALSE;
 	}
 
 	/* Create socket. */
 	hdhomerun_sock_t sock = hdhomerun_sock_create_udp();
 	if (sock == HDHOMERUN_SOCK_INVALID) {
-      MY_LOGD("hdhomerun_discover_sock_add(): invalid socket");
+        MY_LOGD("hdhomerun_discover_sock_add(): invalid socket");
 		return FALSE;
 	}
 
 	/* Bind socket. */
 	if (!hdhomerun_sock_bind(sock, local_ip, 0, FALSE)) {
+		hdhomerun_debug_printf(ds->dbg, "discover: failed to bind to %u.%u.%u.%u:0\n", (unsigned int)(local_ip >> 24) & 0xFF, (unsigned int)(local_ip >> 16) & 0xFF, (unsigned int)(local_ip >> 8) & 0xFF, (unsigned int)(local_ip >> 0) & 0xFF);
 		hdhomerun_sock_destroy(sock);
-      MY_LOGD("hdhomerun_discover_sock_add(): couldn't bind socket");
+        MY_LOGD("hdhomerun_discover_sock_add(): couldn't bind socket");
 		return FALSE;
 	}
 
@@ -89,13 +79,15 @@ static bool_t hdhomerun_discover_sock_add(struct hdhomerun_discover_t *ds, uint3
 	return TRUE;
 }
 
-struct hdhomerun_discover_t *hdhomerun_discover_create(void)
+struct hdhomerun_discover_t *hdhomerun_discover_create(struct hdhomerun_debug_t *dbg)
 {
 	struct hdhomerun_discover_t *ds = (struct hdhomerun_discover_t *)calloc(1, sizeof(struct hdhomerun_discover_t));
 	if (!ds) {
       MY_LOGD("hdhomerun_discover_create(): Couldn't calloc memory");
 		return NULL;
 	}
+
+	ds->dbg = dbg;
 
 	/* Create a routable socket (always first entry). */
 	if (!hdhomerun_discover_sock_add(ds, 0, 0)) {
@@ -130,7 +122,12 @@ static void hdhomerun_discover_sock_detect(struct hdhomerun_discover_t *ds)
 	struct hdhomerun_local_ip_info_t ip_info_list[HDHOMERUN_DISOCVER_MAX_SOCK_COUNT];
 	int count = hdhomerun_local_ip_info(ip_info_list, HDHOMERUN_DISOCVER_MAX_SOCK_COUNT);
 	if (count < 0) {
+		hdhomerun_debug_printf(ds->dbg, "discover: hdhomerun_local_ip_info returned error\n");
 		count = 0;
+	}
+	if (count > HDHOMERUN_DISOCVER_MAX_SOCK_COUNT) {
+		hdhomerun_debug_printf(ds->dbg, "discover: too many local IP addresses\n");
+		count = HDHOMERUN_DISOCVER_MAX_SOCK_COUNT;
 	}
 
 	int index;
@@ -426,7 +423,7 @@ int hdhomerun_discover_find_devices_custom(uint32_t target_ip, uint32_t device_t
 		return 0;
 	}
 
-	struct hdhomerun_discover_t *ds = hdhomerun_discover_create();
+	struct hdhomerun_discover_t *ds = hdhomerun_discover_create(NULL);
 	if (!ds) {
       MY_LOGD("hdhomerun_discover_find_devices_custom(): Can't create discovery struct");
 		return -1;

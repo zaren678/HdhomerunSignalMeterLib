@@ -3,10 +3,10 @@
  *
  * Copyright © 2006-2010 Silicondust USA Inc. <www.silicondust.com>.
  *
- * This library is free software; you can redistribute it and/or 
+ * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 3 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -14,20 +14,8 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
- * 
- * As a special exception to the GNU Lesser General Public License,
- * you may link, statically or dynamically, an application with a
- * publicly distributed version of the Library to produce an
- * executable file containing portions of the Library, and
- * distribute that executable file under terms of your choice,
- * without any of the additional requirements listed in clause 4 of
- * the GNU Lesser General Public License.
- * 
- * By "a publicly distributed version of the Library", we mean
- * either the unmodified Library as distributed by Silicondust, or a
- * modified version of the Library that is distributed under the
- * conditions defined in the GNU Lesser General Public License.
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #define _WINSOCKAPI_
@@ -69,7 +57,6 @@ typedef HANDLE pthread_mutex_t;
 #define atoll _atoi64
 #define strdup _strdup
 #define strcasecmp _stricmp
-#define snprintf _snprintf
 #define fseeko _fseeki64
 #define ftello _ftelli64
 #define THREAD_FUNC_PREFIX DWORD WINAPI
@@ -88,6 +75,9 @@ extern LIBTYPE int pthread_join(pthread_t tid, void **value_ptr);
 extern LIBTYPE void pthread_mutex_init(pthread_mutex_t *mutex, void *attr);
 extern LIBTYPE void pthread_mutex_lock(pthread_mutex_t *mutex);
 extern LIBTYPE void pthread_mutex_unlock(pthread_mutex_t *mutex);
+
+extern LIBTYPE bool_t hdhomerun_vsprintf(char *buffer, char *end, const char *fmt, va_list ap);
+extern LIBTYPE bool_t hdhomerun_sprintf(char *buffer, char *end, const char *fmt, ...);
 
 /*
  * The console output format should be set to UTF-8, however in XP and Vista this breaks batch file processing.

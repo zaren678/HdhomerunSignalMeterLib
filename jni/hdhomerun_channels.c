@@ -3,10 +3,10 @@
  *
  * Copyright © 2007-2008 Silicondust USA Inc. <www.silicondust.com>.
  *
- * This library is free software; you can redistribute it and/or 
+ * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 3 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -14,20 +14,8 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
- * 
- * As a special exception to the GNU Lesser General Public License,
- * you may link, statically or dynamically, an application with a
- * publicly distributed version of the Library to produce an
- * executable file containing portions of the Library, and
- * distribute that executable file under terms of your choice,
- * without any of the additional requirements listed in clause 4 of
- * the GNU Lesser General Public License.
- * 
- * By "a publicly distributed version of the Library", we mean
- * either the unmodified Library as distributed by Silicondust, or a
- * modified version of the Library that is distributed under the
- * conditions defined in the GNU Lesser General Public License.
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "hdhomerun.h"
@@ -69,7 +57,7 @@ static const struct hdhomerun_channelmap_range_t hdhomerun_channelmap_range_eu_b
 
 /* EU cable channels. No common standard - use frequency in MHz for channel number. */
 static const struct hdhomerun_channelmap_range_t hdhomerun_channelmap_range_eu_cable[] = {
-	{ 50, 998,  50000000, 1000000},
+	{108, 862, 108000000, 1000000},
 	{  0,   0,         0,       0}
 };
 
@@ -134,45 +122,57 @@ static const struct hdhomerun_channelmap_range_t hdhomerun_channelmap_range_us_i
 static const struct hdhomerun_channelmap_record_t hdhomerun_channelmap_table[] = {
 	{"au-bcast", hdhomerun_channelmap_range_au_bcast, "au-bcast",               "AU"},
 	{"au-cable", hdhomerun_channelmap_range_eu_cable, "au-cable",               "AU"},
-	{"eu-bcast", hdhomerun_channelmap_range_eu_bcast, "eu-bcast",               "EU PA"},
-	{"eu-cable", hdhomerun_channelmap_range_eu_cable, "eu-cable",               "EU"},
+	{"eu-bcast", hdhomerun_channelmap_range_eu_bcast, "eu-bcast",               NULL},
+	{"eu-cable", hdhomerun_channelmap_range_eu_cable, "eu-cable",               NULL},
 	{"tw-bcast", hdhomerun_channelmap_range_us_bcast, "tw-bcast",               "TW"},
 	{"tw-cable", hdhomerun_channelmap_range_us_cable, "tw-cable",               "TW"},
 
 	{"kr-bcast", hdhomerun_channelmap_range_us_bcast, "kr-bcast",               "KR"},
 	{"kr-cable", hdhomerun_channelmap_range_kr_cable, "kr-cable",               "KR"},
-	{"us-bcast", hdhomerun_channelmap_range_us_bcast, "us-bcast",               "CA US"},
-	{"us-cable", hdhomerun_channelmap_range_us_cable, "us-cable us-hrc us-irc", "CA PA US"},
-	{"us-hrc",   hdhomerun_channelmap_range_us_hrc  , "us-cable us-hrc us-irc", "CA PA US"},
-	{"us-irc",   hdhomerun_channelmap_range_us_irc,   "us-cable us-hrc us-irc", "CA PA US"},
+	{"us-bcast", hdhomerun_channelmap_range_us_bcast, "us-bcast",               NULL},
+	{"us-cable", hdhomerun_channelmap_range_us_cable, "us-cable us-hrc us-irc", NULL},
+	{"us-hrc",   hdhomerun_channelmap_range_us_hrc  , "us-cable us-hrc us-irc", NULL},
+	{"us-irc",   hdhomerun_channelmap_range_us_irc,   "us-cable us-hrc us-irc", NULL},
 
 	{NULL,       NULL,                                NULL,                     NULL}
 };
 
-const char *hdhomerun_channelmap_get_channelmap_from_country_source(const char *countrycode, const char *source)
+const char *hdhomerun_channelmap_get_channelmap_from_country_source(const char *countrycode, const char *source, const char *supported)
 {
-	bool_t country_found = FALSE;
+	const char *default_result = NULL;
 
 	const struct hdhomerun_channelmap_record_t *record = hdhomerun_channelmap_table;
 	while (record->channelmap) {
+		/* Ignore records that do not match the requested source. */
+		if (!strstr(record->channelmap, source)) {
+			record++;
+			continue;
+		}
+
+		/* Ignore records that are not supported by the hardware. */
+		if (!strstr(supported, record->channelmap)) {
+			record++;
+			continue;
+		}
+
+		/* If this record is the default result then remember it and keep searching. */
+		if (!record->countrycodes) {
+			default_result = record->channelmap;
+			record++;
+			continue;
+		}
+
+		/* Ignore records that have a countrycode filter and do not match. */
 		if (!strstr(record->countrycodes, countrycode)) {
 			record++;
 			continue;
 		}
 
-		if (strstr(record->channelmap, source)) {
-			return record->channelmap;
-		}
-
-		country_found = TRUE;
-		record++;
+		/* Record found with exact match for source and countrycode. */
+		return record->channelmap;
 	}
 
-	if (!country_found) {
-		return hdhomerun_channelmap_get_channelmap_from_country_source("EU", source);
-	}
-
-	return NULL;
+	return default_result;
 }
 
 const char *hdhomerun_channelmap_get_channelmap_scan_group(const char *channelmap)
@@ -340,7 +340,7 @@ static void hdhomerun_channel_list_build_range(struct hdhomerun_channel_list_t *
 		entry->channel_number = channel_number;
 		entry->frequency = range->frequency + ((uint32_t)(channel_number - range->channel_range_start) * range->spacing);
 		entry->frequency = hdhomerun_channel_frequency_round_normal(entry->frequency);
-		sprintf(entry->name, "%s:%u", channelmap, entry->channel_number);
+		hdhomerun_sprintf(entry->name, entry->name + sizeof(entry->name), "%s:%u", channelmap, entry->channel_number);
 
 		hdhomerun_channel_list_build_insert(channel_list, entry);
 	}

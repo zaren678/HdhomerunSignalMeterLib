@@ -3,10 +3,10 @@
  *
  * Copyright © 2006-2010 Silicondust USA Inc. <www.silicondust.com>.
  *
- * This library is free software; you can redistribute it and/or 
+ * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
- * version 3 of the License, or (at your option) any later version.
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -14,20 +14,8 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
- * 
- * As a special exception to the GNU Lesser General Public License,
- * you may link, statically or dynamically, an application with a
- * publicly distributed version of the Library to produce an
- * executable file containing portions of the Library, and
- * distribute that executable file under terms of your choice,
- * without any of the additional requirements listed in clause 4 of
- * the GNU Lesser General Public License.
- * 
- * By "a publicly distributed version of the Library", we mean
- * either the unmodified Library as distributed by Silicondust, or a
- * modified version of the Library that is distributed under the
- * conditions defined in the GNU Lesser General Public License.
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "hdhomerun.h"
@@ -372,10 +360,10 @@ void hdhomerun_video_debug_print_stats(struct hdhomerun_video_sock_t *vs)
 	struct hdhomerun_video_stats_t stats;
 	hdhomerun_video_get_stats(vs, &stats);
 
-	hdhomerun_debug_printf(vs->dbg, "video sock: pkt=%lu net=%lu te=%lu miss=%lu drop=%lu\n",
-		(unsigned long)stats.packet_count, (unsigned long)stats.network_error_count,
-		(unsigned long)stats.transport_error_count, (unsigned long)stats.sequence_error_count,
-		(unsigned long)stats.overflow_error_count
+	hdhomerun_debug_printf(vs->dbg, "video sock: pkt=%u net=%u te=%u miss=%u drop=%u\n",
+		(unsigned int)stats.packet_count, (unsigned int)stats.network_error_count,
+		(unsigned int)stats.transport_error_count, (unsigned int)stats.sequence_error_count,
+		(unsigned int)stats.overflow_error_count
 	);
 }
 
