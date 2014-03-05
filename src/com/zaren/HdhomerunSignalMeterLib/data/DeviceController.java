@@ -13,6 +13,7 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.StringTokenizer;
 
 /**
  * this class will monitor signal strength and perform higher level functions
@@ -177,7 +178,7 @@ public class DeviceController
 
                 JniString theProgram = new JniString();
                 mDevice.getTunerProgram( theProgram );
-                final int theIntialProgram = Integer.parseInt( theProgram.getString() );
+                final int theIntialProgram = ParseProgram( theProgram );
 
                 notifyObserversProgramListChanged( thePrograms, theInitialChannel );
 
@@ -200,6 +201,26 @@ public class DeviceController
                 }
             }
         } );
+    }
+
+    private int ParseProgram( final JniString aProgram )
+    {
+        String theProgramStr = aProgram.getString();
+
+        StringTokenizer theTokenizer = new StringTokenizer( theProgramStr );
+        if( theTokenizer.countTokens() > 0 )
+        {
+            try
+            {
+                return Integer.parseInt( theTokenizer.nextToken() );
+            }
+            catch( NumberFormatException e )
+            {
+                return 0;
+            }
+        }
+
+        return 0;
     }
 
     public void startTunerStatusUpdates()
@@ -380,7 +401,7 @@ public class DeviceController
 
                     try
                     {
-                        theRetProgram = Integer.parseInt( theProgram.getString() );
+                        theRetProgram = ParseProgram( theProgram );
                     }
                     catch( NumberFormatException e )
                     {
@@ -782,7 +803,7 @@ public class DeviceController
             JniString thePrevProgramStr = new JniString();
             mDevice.getTunerProgram( thePrevProgramStr );
 
-            int thePrevProgramNum = Integer.parseInt( thePrevProgramStr.getString() );
+            int thePrevProgramNum = ParseProgram( thePrevProgramStr );
 
             ChannelScanProgram thePrevProgram = null;
 
