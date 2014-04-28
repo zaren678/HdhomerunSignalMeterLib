@@ -257,10 +257,10 @@ void hdhomerun_debug_printf(struct hdhomerun_debug_t *dbg, const char *fmt, ...)
 
 void hdhomerun_debug_vprintf(struct hdhomerun_debug_t *dbg, const char *fmt, va_list args)
 {
-	/*if (!dbg) {
+	if (!dbg) {
 		return;
 	}
-	if (!dbg->enabled) {
+	/*if (!dbg->enabled) {
 		return;
 	}*/
 
