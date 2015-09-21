@@ -2,12 +2,12 @@ import org.apache.tools.ant.taskdefs.condition.Os
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion "21.1.2"
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
         minSdkVersion 7
-        targetSdkVersion 21
+        targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
 
@@ -38,19 +38,20 @@ android {
 //    }
 
     // call regular ndk-build(.cmd) script from app directory
-    task ndkBuild(type: Exec) {
-        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-            commandLine android.plugin.ndkFolder.absolutePath + '/ndk-build.cmd', '-C', file('src/main/jni').absolutePath
-        } else {
-            commandLine android.plugin.ndkFolder.absolutePath + '/ndk-build', '-C', file('src/main/jni').absolutePath
-        }
-    }
+//    task ndkBuild(type: Exec) {
+//        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+//            commandLine android.plugin.ndkFolder.absolutePath + '/ndk-build.cmd', '-C', file('src/main/jni').absolutePath
+//        } else {
+//            commandLine android.plugin.ndkFolder.absolutePath + '/ndk-build', '-C', file('src/main/jni').absolutePath
+//        }
+//    }
 
     tasks.withType(JavaCompile) {
-        compileTask -> compileTask.dependsOn ndkBuild
+//        compileTask -> compileTask.dependsOn ndkBuild
     }
 }
 
 dependencies {
-    compile "com.android.support:support-v4:21.0.3"
+    compile rootProject.ext.supportV4
+    compile rootProject.ext.timber
 }

@@ -1,6 +1,6 @@
 package com.zaren.HdhomerunSignalMeterLib.data;
 
-import com.zaren.HdhomerunSignalMeterLib.util.HDHomerunLogger;
+import timber.log.Timber;
 
 public class SetChannelRunnable implements Runnable
 {
@@ -48,7 +48,7 @@ public class SetChannelRunnable implements Runnable
          theGotLock = true;
                   
          theResponse.setStatus( mDevice.setTunerChannel( "auto:" + mChannel ) );
-         HDHomerunLogger.d("Tune channel Status " + theStatus);
+         Timber.d( "Tune channel Status " + theStatus );
          
          if( theResponse.getStatus() != DeviceResponse.SUCCESS )
          {            
@@ -57,7 +57,7 @@ public class SetChannelRunnable implements Runnable
          }
          
          theResponse.setStatus( mDevice.waitForLock(theTunerStatus) );
-         HDHomerunLogger.d("Wait for lock status  " + theStatus);               
+         Timber.d("Wait for lock status  " + theStatus);
 
          if( theResponse.getStatus() != DeviceResponse.SUCCESS )
          {

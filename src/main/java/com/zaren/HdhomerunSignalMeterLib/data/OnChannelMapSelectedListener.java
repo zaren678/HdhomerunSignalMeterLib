@@ -4,7 +4,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 
-import com.zaren.HdhomerunSignalMeterLib.util.HDHomerunLogger;
+import timber.log.Timber;
 
 public class OnChannelMapSelectedListener implements OnItemSelectedListener 
 {
@@ -22,7 +22,7 @@ public class OnChannelMapSelectedListener implements OnItemSelectedListener
 	{
 	   String channelMapSelected;
 	   
-	   HDHomerunLogger.d("OnChannelMapSelectedListener: pos " + pos);
+	   Timber.d( "OnChannelMapSelectedListener: pos " + pos );
 	   
 		channelMapSelected = (String)parent.getItemAtPosition(pos);
 		ctrl.setChannelMap( channelMapSelected );

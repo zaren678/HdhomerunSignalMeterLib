@@ -1,6 +1,6 @@
 package com.zaren.HdhomerunSignalMeterLib.data;
 
-import com.zaren.HdhomerunSignalMeterLib.util.HDHomerunLogger;
+import timber.log.Timber;
 
 public class ChannelList
 {
@@ -96,7 +96,7 @@ public class ChannelList
          entry = entry.getNext();
       }
       
-      HDHomerunLogger.d("findMaxAndMin(): min " + minNumber + " max " + maxNumber);
+      Timber.d( "findMaxAndMin(): min " + minNumber + " max " + maxNumber );
    }
    
    public int frequencyToNumber(int frequency)
@@ -112,8 +112,8 @@ public class ChannelList
          }
          entry = entry.getNext();
       }
-      
-      HDHomerunLogger.v("frequencyToNumber(): freq " + frequency + " num " + retNumber);
+
+      Timber.v("frequencyToNumber(): freq " + frequency + " num " + retNumber);
       
       return retNumber;
    }

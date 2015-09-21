@@ -1,6 +1,6 @@
 package com.zaren.HdhomerunSignalMeterLib.data;
 
-import com.zaren.HdhomerunSignalMeterLib.util.HDHomerunLogger;
+import timber.log.Timber;
 
 public class SetVChannelRunnable implements Runnable
 {
@@ -38,12 +38,12 @@ public class SetVChannelRunnable implements Runnable
       if(theStatus > 0)
       {            
          theStatus = mDevice.setTunerVChannel( "" + mChannel );            
-         HDHomerunLogger.d( "Tune Virtual channel Status " + theStatus );
+         Timber.d( "Tune Virtual channel Status " + theStatus );
          
          if (theStatus > 0)
          {
             theStatus = mDevice.waitForLock( theTunerStatus );
-            HDHomerunLogger.d( "Wait for lock status  " + theStatus );
+            Timber.d( "Wait for lock status  " + theStatus );
 
             if (theStatus > 0)
             {                  
@@ -51,7 +51,7 @@ public class SetVChannelRunnable implements Runnable
                
                TunerVStatus theTunerVStatus = new TunerVStatus();
                mDevice.updateTunerVStatus( theTunerVStatus );
-               HDHomerunLogger.d( theTunerVStatus.toString() );
+               Timber.d( theTunerVStatus.toString() );
                
                JniString theProgram = new JniString();
                mDevice.getTunerProgram( theProgram );

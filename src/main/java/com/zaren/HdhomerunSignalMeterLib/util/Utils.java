@@ -2,6 +2,8 @@ package com.zaren.HdhomerunSignalMeterLib.util;
 
 import com.zaren.HdhomerunSignalMeterLib.data.HdhomerunDevice;
 
+import timber.log.Timber;
+
 public class Utils
 {
    public static byte[] ipAddressToByteArray( int ipAddress )
@@ -58,7 +60,7 @@ public class Utils
    
    public static String getChannelStringFromTunerStatusChannel(HdhomerunDevice aDevice, String aChannel, String aLockStr)
    {
-      HDHomerunLogger.v("getChannelNumberFromTunerStatusChannel: "+aChannel + " " + aLockStr);
+      Timber.v( "getChannelNumberFromTunerStatusChannel: " + aChannel + " " + aLockStr );
       if(aChannel.equals("none"))
       {
          return aChannel;
@@ -97,7 +99,7 @@ public class Utils
    
    public static int getChannelNumberFromTunerStatusChannel( HdhomerunDevice aDevice, String aChannel )
    {
-      HDHomerunLogger.v( "getChannelNumberFromTunerStatusChannel: "+aChannel );
+      Timber.v( "getChannelNumberFromTunerStatusChannel: "+aChannel );
       if( aChannel.equals( "none" ) )
       {
          return -1;

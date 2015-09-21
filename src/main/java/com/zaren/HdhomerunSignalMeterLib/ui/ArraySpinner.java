@@ -1,7 +1,6 @@
 package com.zaren.HdhomerunSignalMeterLib.ui;
 
 import com.zaren.HdhomerunSignalMeterLib.R;
-import com.zaren.HdhomerunSignalMeterLib.util.HDHomerunLogger;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -11,6 +10,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.AdapterView.OnItemSelectedListener;
+
+import timber.log.Timber;
 
 public class ArraySpinner extends Spinner implements OnItemSelectedListener
 {
@@ -33,7 +34,7 @@ public class ArraySpinner extends Spinner implements OnItemSelectedListener
 
    public void setArrayAdapter(ArrayAdapter<?> adapter)
    {
-      HDHomerunLogger.d("ArraySpinner: setArrayAdapter");
+      Timber.d( "ArraySpinner: setArrayAdapter" );
       this.setAdapter(adapter);
       arrayAdapter = adapter;
       
@@ -70,7 +71,7 @@ public class ArraySpinner extends Spinner implements OnItemSelectedListener
       
       ignoreFirst = a.getBoolean(R.styleable.ArraySpinner_ignoreFirst,false);
       
-      HDHomerunLogger.d("ArraySpinner: init: ignoreFirst " +ignoreFirst);
+      Timber.d("ArraySpinner: init: ignoreFirst " +ignoreFirst);
       
       if(ignoreFirst == false)
       {
@@ -107,10 +108,10 @@ public class ArraySpinner extends Spinner implements OnItemSelectedListener
    public void onItemSelected(AdapterView<?> parent, View view, int pos,
          long id)
    {
-      HDHomerunLogger.d("ArraySpinner: OnItemSelected:  pos: " + pos);
+      Timber.d("ArraySpinner: OnItemSelected:  pos: " + pos);
       if(mPrevSelectedItemPos == pos)
       {
-         HDHomerunLogger.d("ArraySpinner: Ignore");
+         Timber.d("ArraySpinner: Ignore");
       }
       else
       {
@@ -133,14 +134,14 @@ public class ArraySpinner extends Spinner implements OnItemSelectedListener
     */
    public void setSelectionSilently(int pos)
    {
-      HDHomerunLogger.d("ArraySpinner: setSelectionSilently: pos " + pos);
+      Timber.d("ArraySpinner: setSelectionSilently: pos " + pos);
       mPrevSelectedItemPos = pos;
       setSelection(pos);
    }
    
    public int getPrevSelectedItemPos()
    {
-      HDHomerunLogger.d("ArraySpinner: getPrevSelectedItemPos: prevPos " + mPrevSelectedItemPos);
+      Timber.d("ArraySpinner: getPrevSelectedItemPos: prevPos " + mPrevSelectedItemPos);
       return mPrevSelectedItemPos ;
    }
 
@@ -150,7 +151,7 @@ public class ArraySpinner extends Spinner implements OnItemSelectedListener
    @Override
    public void setSelection(int position)
    {
-      HDHomerunLogger.d("ArraySpinner: setSelection: pos " + position + " prevPos " + mPrevSelectedItemPos);
+      Timber.d("ArraySpinner: setSelection: pos " + position + " prevPos " + mPrevSelectedItemPos);
       super.setSelection(position);
    }
 }

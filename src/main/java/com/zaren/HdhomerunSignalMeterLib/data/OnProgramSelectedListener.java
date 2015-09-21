@@ -4,7 +4,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 
-import com.zaren.HdhomerunSignalMeterLib.util.HDHomerunLogger;
+import timber.log.Timber;
 
 public class OnProgramSelectedListener implements OnItemSelectedListener
 {
@@ -20,7 +20,7 @@ public class OnProgramSelectedListener implements OnItemSelectedListener
    {
       ChannelScanProgram programSelected;
       
-      HDHomerunLogger.d("OnProgramSelectedListener: pos " + pos);
+      Timber.d( "OnProgramSelectedListener: pos " + pos );
       
       programSelected = (ChannelScanProgram)parent.getItemAtPosition(pos);
       ctrl.setProgram( programSelected.programNumber );

@@ -37,7 +37,7 @@ void my_log_print(const android_LogPriority level, const char* format, ...)
       isAttached = TRUE;
    }
    
-   jclass loggerClass = (*env)->FindClass(env,"com/zaren/HdhomerunSignalMeterLib/util/HDHomerunLogger");
+   jclass loggerClass = (*env)->FindClass(env,"com/zaren/HdhomerunSignalMeterLib/util/Timber");
    
    if(loggerClass == NULL)
    {

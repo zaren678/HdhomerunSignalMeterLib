@@ -1,7 +1,6 @@
 package com.zaren.HdhomerunSignalMeterLib.data;
 
 import com.zaren.HdhomerunSignalMeterLib.util.ErrorHandler;
-import com.zaren.HdhomerunSignalMeterLib.util.HDHomerunLogger;
 import com.zaren.HdhomerunSignalMeterLib.util.Utils;
 
 import java.io.Serializable;
@@ -10,8 +9,9 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
-public class HdhomerunDevice implements Serializable
-{
+import timber.log.Timber;
+
+public class HdhomerunDevice implements Serializable{
     private static final long serialVersionUID = 1942906208628106963L;
     public static final String DEVICE_CABLECARD = "cablecard";
     public static final String DEVICE_ATSC = "atsc";
@@ -39,13 +39,11 @@ public class HdhomerunDevice implements Serializable
      * library has already been unpacked into /data/data/PROJECT/lib/C-FILE.so at
      * installation time by the package manager.
      */
-    static
-    {
+    static{
         System.loadLibrary( "hdhomerun" );
     }
 
-    public HdhomerunDevice( long deviceId_val, int ipAddr_val, int tuner_val ) throws HdhomerunCommErrorException
-    {
+    public HdhomerunDevice( long deviceId_val, int ipAddr_val, int tuner_val ) throws HdhomerunCommErrorException{
         String supportedString;
 
         this.deviceId = deviceId_val;
@@ -56,94 +54,73 @@ public class HdhomerunDevice implements Serializable
 
         deviceName = Long.toHexString( deviceId_val ) + "-" + tuner_val;
 
-        HDHomerunLogger.d( "Device created id:" + deviceName );
+        Timber.d( "Device created id:" + deviceName );
 
         // Now Lets collect the supported channelmaps
         supportedString = JNIgetSupported( cPointer );
-        HDHomerunLogger.d( supportedString );
+        Timber.d( supportedString );
         StringTokenizer st = new StringTokenizer( supportedString, "\n" );
 
-        while( st.hasMoreTokens() == true )
-        {
+        while( st.hasMoreTokens() == true ){
             processSupportedString( st.nextToken() );
         }
 
         //now the device type
         String deviceModel = getModel();
 
-        HDHomerunLogger.d( "Device model " + deviceModel );
+        Timber.d( "Device model " + deviceModel );
 
-        if( deviceModel.contains( "cablecard" ) )
-        {
+        if( deviceModel.contains( "cablecard" ) ){
             deviceType = DEVICE_CABLECARD;
-        }
-        else if( deviceModel.equals( "hdhomeruntc_atsc" ) )
-        {
+        } else if( deviceModel.equals( "hdhomeruntc_atsc" ) ){
             deviceType = DEVICE_TC_ATSC;
-        }
-        else
-        {
+        } else {
             deviceType = DEVICE_ATSC;
         }
 
-        HDHomerunLogger.d( "Device type " + deviceType );
+        Timber.d( "Device type " + deviceType );
     }
 
-    private void processSupportedString( String token )
-    {
+    private void processSupportedString( String token ){
         StringTokenizer st = new StringTokenizer( token );
 
         // need at least two tokens, one for the key and 1 for the value, if not
         // at least 2 its worthless
-        if( st.countTokens() > 1 )
-        {
+        if( st.countTokens() > 1 ){
             String key = st.nextToken();
 
-            if( key.equals( "channelmap:" ) )
-            {
+            if( key.equals( "channelmap:" ) ){
                 int i = 0; // just a counter
-                channelMaps = new String[ st.countTokens() ];
-                while( st.hasMoreTokens() == true )
-                {
-                    channelMaps[ i ] = st.nextToken();
+                channelMaps = new String[st.countTokens()];
+                while( st.hasMoreTokens() == true ){
+                    channelMaps[i] = st.nextToken();
                     i++;
                 }
-            }
-            else if( key.equals( "modulation:" ) )
-            {
+            } else if( key.equals( "modulation:" ) ){
                 // don't care about this yet
-            }
-            else if( key.equals( "auto-modulation:" ) )
-            {
+            } else if( key.equals( "auto-modulation:" ) ){
                 // don't care about this yet
-            }
-            else if( key.equals( "transcode:" ) )
-            {
+            } else if( key.equals( "transcode:" ) ){
                 int i = 0; // just a counter
-                transcodeProfiles = new String[ st.countTokens() ];
-                while( st.hasMoreTokens() == true )
-                {
-                    transcodeProfiles[ i ] = st.nextToken();
+                transcodeProfiles = new String[st.countTokens()];
+                while( st.hasMoreTokens() == true ){
+                    transcodeProfiles[i] = st.nextToken();
                     i++;
                 }
-            }
-            else
-            {
-                HDHomerunLogger.w( "Unhandled token type: " + key );
+            } else {
+                Timber.w( "Unhandled token type: " + key );
             }
         }
     }
 
-    public void destroy()
-    {
-        HDHomerunLogger.d( "Destroying device " + deviceName );
+    public void destroy(){
+        Timber.d( "Destroying device " + deviceName );
         JNIdestroy( cPointer );
         cPointer = -1;
     }
 
-    synchronized public int setChannelMap( String channelMap )
-    {
-        HDHomerunLogger.d( "Set ChannelMap to " + channelMap + " for device " + deviceName );
+    synchronized public int setChannelMap( String channelMap ){
+        Timber.d( "Set ChannelMap to " + channelMap + " for device " + deviceName );
         int status = JNIsetChannelMap( this.cPointer, channelMap );
 
         //TODO need to recalc channellist
@@ -153,18 +130,16 @@ public class HdhomerunDevice implements Serializable
 
     private native int JNIgetTunerChannel( long aCPointer, JniString aChannel );
 
-    public int getTunerChannel( JniString aChannel )
-    {
+    public int getTunerChannel( JniString aChannel ){
         int theRetVal = JNIgetTunerChannel( cPointer, aChannel );
 
-        HDHomerunLogger.d( "getTunerChannel: return val " + theRetVal + " channel: " + aChannel.getString() );
+        Timber.d( "getTunerChannel: return val " + theRetVal + " channel: " + aChannel.getString() );
 
         return theRetVal;
     }
 
-    synchronized public int setTunerChannel( String channel )
-    {
-        HDHomerunLogger.d( "Set Channel to " + channel + " for device " + deviceName );
+    synchronized public int setTunerChannel( String channel ){
+        Timber.d( "Set Channel to " + channel + " for device " + deviceName );
         int status;
 
         status = JNIsetTunerChannel( cPointer, channel );
@@ -173,33 +148,27 @@ public class HdhomerunDevice implements Serializable
         //TODO for some reason this is crashing when we hit the end of a channel scan for the cable channelmaps
         //checkForError(status, "SetTunerChannel");
 
-        if( status == -1 )
-        {
+        if( status == -1 ){
             // network error, we need to give up
         }
 
         return status;
     }
 
-    synchronized public TunerStatus getTunerStatus()
-    {
+    synchronized public TunerStatus getTunerStatus(){
         TunerStatus tunerStatus = JNIgetTunerStatus( cPointer );
 
         boolean error = checkForError( tunerStatus.returnStatus, "GetTunerStatus" );
 
-        if( error == false )
-        {
+        if( error == false ){
             prevTunerStatus = tunerStatus;
             return tunerStatus;
-        }
-        else
-        {
+        } else {
             return prevTunerStatus;
         }
     }
 
-    public synchronized int updateTunerStatus( TunerStatus tunerStatus )
-    {
+    public synchronized int updateTunerStatus( TunerStatus tunerStatus ){
         int status = JNIupdateTunerStatus( cPointer, tunerStatus );
 
         checkForError( status, "UpdateTunerStatus" );
@@ -217,8 +186,7 @@ public class HdhomerunDevice implements Serializable
 
     private synchronized native int JNIwaitForLock( long cPointer, TunerStatus tunerStatus );
 
-    synchronized public int waitForLock( TunerStatus tunerStatus )
-    {
+    synchronized public int waitForLock( TunerStatus tunerStatus ){
         int retVal = JNIwaitForLock( cPointer, tunerStatus );
 
         ErrorHandler.HandleError( retVal, "Wait for Lock" );
@@ -228,80 +196,66 @@ public class HdhomerunDevice implements Serializable
 
     private synchronized native int JNIgetTunerStreamInfo( long cPointer, JniString streamInfo );
 
-    synchronized public int getTunerStreamInfo( ProgramsList thePrograms )
-    {
+    synchronized public int getTunerStreamInfo( ProgramsList thePrograms ){
         JniString streamInfo = new JniString();
         int retVal = JNIgetTunerStreamInfo( cPointer, streamInfo );
 
         ErrorHandler.HandleError( retVal, "Get Tuner Stream Info" );
 
-        if( retVal > 0 )
-        {
+        if( retVal > 0 ){
             convertStreamInfoToPrograms( streamInfo.getString(), thePrograms );
         }
 
         return retVal;
     }
 
-    private void convertStreamInfoToPrograms( String streamInfo, ProgramsList thePrograms )
-    {
+    private void convertStreamInfoToPrograms( String streamInfo, ProgramsList thePrograms ){
         StringTokenizer theProgramStrings = new StringTokenizer( streamInfo, "\n" );
 
-        while( theProgramStrings.hasMoreTokens() )
-        {
-            try
-            {
+        while( theProgramStrings.hasMoreTokens() ){
+            try{
                 String theProgramString = "";
 
-                if( theProgramStrings.hasMoreTokens() )
-                {
+                if( theProgramStrings.hasMoreTokens() ){
                     theProgramString = theProgramStrings.nextToken();
                 }
 
-                HDHomerunLogger.d( "Parsing program string: " + theProgramString );
+                Timber.d( "Parsing program string: " + theProgramString );
 
                 StringTokenizer theProgNumAndName = new StringTokenizer( theProgramString, ":" );
 
                 ChannelScanProgram theProgram = new ChannelScanProgram();
                 theProgram.programString = theProgramString;
 
-                while( theProgNumAndName.hasMoreTokens() )
-                {
+                while( theProgNumAndName.hasMoreTokens() ){
                     theProgram.programNumber = Integer.parseInt( theProgNumAndName.nextToken() );
 
                     processProgramName( theProgNumAndName.nextToken(), theProgram );
                 }
 
                 thePrograms.append( theProgram.programNumber, theProgram );
-            }
-            catch( NumberFormatException e )
-            {
-                HDHomerunLogger.e( "Error Parsing String: " + e );
-            }
-            catch( NoSuchElementException e )
-            {
-                HDHomerunLogger.e( "NoSuchElementException: " + e );
+            } catch( NumberFormatException e ) {
+                Timber.e( "Error Parsing String: " + e );
+            } catch( NoSuchElementException e ) {
+                Timber.e( "NoSuchElementException: " + e );
             }
         }
     }
 
     private static final String[] theTypes = new String[]{ "control", "encrypted", "no data", "internet" };
 
-    private void processProgramName( String aProgramName, ChannelScanProgram aProgram )
-    {
+    private void processProgramName( String aProgramName, ChannelScanProgram aProgram ){
         int theOpeningParen = aProgramName.indexOf( "(" );
         int theClosingParen = aProgramName.indexOf( ")" );
 
         String theJustProgramName = aProgramName;
 
-        if( theOpeningParen != -1 && theClosingParen != -1 )
-        {
+        if( theOpeningParen != -1 && theClosingParen != -1 ){
             //This is the string that says "control" or "encrypted" or "no data"
             String theTypeString = aProgramName.substring( theOpeningParen + 1, theClosingParen );
-            List<String> theTypeStrings = Arrays.asList( theTypes );
+            List< String > theTypeStrings = Arrays.asList( theTypes );
 
-            if( theTypeStrings.contains( theTypeString ) )
-            {
+            if( theTypeStrings.contains( theTypeString ) ){
                 aProgram.type = theTypeString;
                 theJustProgramName = aProgramName.substring( 0, theOpeningParen );
             }
@@ -312,18 +266,15 @@ public class HdhomerunDevice implements Serializable
         StringTokenizer theChannelStrings = new StringTokenizer( theChannelNumbers, "." );
         aProgram.virtualMajor = Integer.parseInt( theChannelStrings.nextToken() );
 
-        if( theChannelStrings.hasMoreTokens() )
-        {
+        if( theChannelStrings.hasMoreTokens() ){
             aProgram.virtualMinor = Integer.parseInt( theChannelStrings.nextToken() );
         }
 
         StringBuilder theNameStringBuilder = new StringBuilder();
-        while( theStrings.hasMoreTokens() )
-        {
+        while( theStrings.hasMoreTokens() ){
             String theString = theStrings.nextToken();
 
-            if( theNameStringBuilder.length() > 0 )
-            {
+            if( theNameStringBuilder.length() > 0 ){
                 theNameStringBuilder.append( " " );
             }
             theNameStringBuilder.append( theString );
@@ -344,8 +295,7 @@ public class HdhomerunDevice implements Serializable
 
     private synchronized native int JNIupdateTunerVStatus( long cPointer, TunerVStatus tunerVStatus );
 
-    public int updateTunerVStatus( TunerVStatus tunerVStatus )
-    {
+    public int updateTunerVStatus( TunerVStatus tunerVStatus ){
         int status = JNIupdateTunerVStatus( cPointer, tunerVStatus );
 
         checkForError( status, "UpdateTunerVStatus" );
@@ -355,20 +305,17 @@ public class HdhomerunDevice implements Serializable
 
     private synchronized native TunerVStatus JNIgetTunerVStatus( long cPointer );
 
-    public TunerVStatus getTunerVStatus()
-    {
+    public TunerVStatus getTunerVStatus(){
         TunerVStatus tunerVStatus = JNIgetTunerVStatus( cPointer );
         return tunerVStatus;
     }
 
     private synchronized native String JNIgetModel( long cPointer );
 
-    public String getModel() throws HdhomerunCommErrorException
-    {
+    public String getModel() throws HdhomerunCommErrorException{
         String retVal = JNIgetModel( cPointer );
 
-        if( retVal == null )
-        {
+        if( retVal == null ){
             throw new HdhomerunCommErrorException( "Failed to get model information" );
         }
 
@@ -377,8 +324,7 @@ public class HdhomerunDevice implements Serializable
 
     private synchronized native int JNIcreateChannelList( String channelMap, ChannelList channelList );
 
-    public int createChannelList( String channelMap, ChannelList channelList )
-    {
+    public int createChannelList( String channelMap, ChannelList channelList ){
         int status = JNIcreateChannelList( channelMap, channelList );
         this.channelList = channelList;
         return status;
@@ -387,126 +333,95 @@ public class HdhomerunDevice implements Serializable
     /**
      * @return the channelMaps
      */
-    public String[] getChannelMaps()
-    {
+    public String[] getChannelMaps(){
         return channelMaps;
     }
 
     /**
      * @return the transcode profiles
      */
-    public String[] getTranscodeProfiles()
-    {
+    public String[] getTranscodeProfiles(){
         return transcodeProfiles;
     }
 
-    synchronized public String getCurrentChannelMap()
-    {
+    synchronized public String getCurrentChannelMap(){
         String channelMap = JNIgetChannelMap( cPointer );
 
         boolean error = checkForError( channelMap, "GetCurrentChannelMap" );
 
-        if( error == false )
-        {
+        if( error == false ){
             prevChannelMap = channelMap;
             return channelMap;
-        }
-        else
-        {
+        } else {
             return prevChannelMap;
         }
     }
 
-    private boolean checkForError( int returnStatus, String message )
-    {
+    private boolean checkForError( int returnStatus, String message ){
         //ErrorHandler.HandleError(returnStatus, message);
-        if( returnStatus == 0 )
-        {
+        if( returnStatus == 0 ){
             return true;
-        }
-        else if( returnStatus == -1 )
-        {
+        } else if( returnStatus == -1 ){
             return true;
         }
         return false;
     }
 
-    private boolean checkForError( String returnString, String message )
-    {
-        if( returnString.equals( "rejected" ) )
-        {
+    private boolean checkForError( String returnString, String message ){
+        if( returnString.equals( "rejected" ) ){
             //ErrorHandler.HandleError(0, message);
             return true;
-        }
-        else if( returnString.equals( "Network failure" ) )
-        {
+        } else if( returnString.equals( "Network failure" ) ){
             //ErrorHandler.HandleError(-1, message);
             return true;
         }
         return false;
     }
 
-    public int getCurrentChannel()
-    {
+    public int getCurrentChannel(){
         TunerStatus tunerStatus = getTunerStatus();
 
         String channelString = tunerStatus.channel;
 
-        if( channelString.equals( "none" ) )
-        {
+        if( channelString.equals( "none" ) ){
             return -1;
-        }
-        else
-        {
+        } else {
             String[] splitString = channelString.split( ":" );
-            return Integer.parseInt( splitString[ 1 ] );
+            return Integer.parseInt( splitString[1] );
         }
     }
 
-    String buildChannelStringFromTunerStatus( String channel, String lockStr )
-    {
-        HDHomerunLogger.v( "BuildChannelString: " + channel + " " + lockStr );
-        if( channel.equals( "none" ) )
-        {
+    String buildChannelStringFromTunerStatus( String channel, String lockStr ){
+        Timber.v( "BuildChannelString: " + channel + " " + lockStr );
+        if( channel.equals( "none" ) ){
             return channel;
-        }
-        else
-        {
+        } else {
             String[] splitString = channel.split( ":" );
-            if( splitString.length > 1 )
-            {
-                int channel_int = Integer.parseInt( splitString[ 1 ] );
-                if( channel_int > 1000 )
-                {
+            if( splitString.length > 1 ){
+                int channel_int = Integer.parseInt( splitString[1] );
+                if( channel_int > 1000 ){
                     //this must be a frequency value
                     channel_int = frequencyToChannelNumber( channel_int );
 
-                    if( channel_int == 0 )
-                    {
+                    if( channel_int == 0 ){
                         //for some reason we couldn't match up the frequency to channel number, just return the frequency
-                        return lockStr + ":" + splitString[ 1 ];
+                        return lockStr + ":" + splitString[1];
                     }
 
                     return lockStr + ":" + channel_int;
+                } else {
+                    return lockStr + ":" + splitString[1];
                 }
-                else
-                {
-                    return lockStr + ":" + splitString[ 1 ];
-                }
-            }
-            else
-            {
+            } else {
                 //something was wrong with the channel from the device
                 return "none";
             }
         }
     }
 
-    protected String getChannelNumberFromChannelString( String channelString )
-    {
-        HDHomerunLogger.v( "getChannelNumberFromChannelString(): " + channelString );
-        if( channelString.equals( "none" ) )
-        {
+    protected String getChannelNumberFromChannelString( String channelString ){
+        Timber.v( "getChannelNumberFromChannelString(): " + channelString );
+        if( channelString.equals( "none" ) ){
             return "";
         }
 
@@ -514,99 +429,85 @@ public class HdhomerunDevice implements Serializable
         String channelMapstrings[] = channelString.split( "," );
 
         //just use the first one
-        String strings[] = channelMapstrings[ 0 ].split( ":" );
+        String strings[] = channelMapstrings[0].split( ":" );
 
         //if it didn't return more than two results that means for some reason we don't have a channel number
-        if( strings.length < 2 )
-        {
+        if( strings.length < 2 ){
             return "";
         }
 
-        int channelInt = Integer.parseInt( strings[ 1 ] );
+        int channelInt = Integer.parseInt( strings[1] );
 
-        if( channelInt > 1000 )
-        {
+        if( channelInt > 1000 ){
             //this must be a frequency value
             int convertedChannelInt = frequencyToChannelNumber( channelInt );
 
-            if( convertedChannelInt == 0 )
-            {
+            if( convertedChannelInt == 0 ){
                 //for some reason we couldn't match up the frequency to channel number, just return the frequency
                 return "" + channelInt;
             }
 
             return "" + convertedChannelInt;
-        }
-        else
-        {
+        } else {
             return "" + channelInt;
         }
     }
 
-    public int frequencyToChannelNumber( int frequency )
-    {
+    public int frequencyToChannelNumber( int frequency ){
         return channelList.frequencyToNumber( frequency );
     }
 
     /**
      * @return the cPointer
      */
-    public long getcPointer()
-    {
+    public long getcPointer(){
         return cPointer;
     }
 
     /**
      * @return the deviceName
      */
-    public String getDeviceName()
-    {
+    public String getDeviceName(){
         return deviceName;
     }
 
     /**
      * @return the deviceId
      */
-    public long getDeviceId()
-    {
+    public long getDeviceId(){
         return deviceId;
     }
 
     /**
      * @return the ipAddr
      */
-    public int getIpAddr()
-    {
+    public int getIpAddr(){
         return ipAddr;
     }
 
     /**
      * @return the ipAddr as a byte array
      */
-    public byte[] getIpAddrArray()
-    {
+    public byte[] getIpAddrArray(){
         return Utils.HdHrIpAddressToByteArray( ipAddr );
     }
 
     /**
      * @return the tuner
      */
-    public int getTuner()
-    {
+    public int getTuner(){
         return tuner;
     }
 
     /**
      * @return the deviceType
      */
-    public String getDeviceType()
-    {
+    public String getDeviceType(){
         return deviceType;
     }
 
-    public int setTunerVChannel( String channel )
-    {
-        HDHomerunLogger.d( "Set Virtual Channel to " + channel + " for device " + deviceName );
+    public int setTunerVChannel( String channel ){
+        Timber.d( "Set Virtual Channel to " + channel + " for device " + deviceName );
         int status;
 
         status = JNIsetTunerVChannel( cPointer, channel );
@@ -614,8 +515,7 @@ public class HdhomerunDevice implements Serializable
         //TODO for some reason this is crashing when we hit the end of a channel scan for the cable channelmaps
         //checkForError(status, "SetTunerChannel");
 
-        if( status == -1 )
-        {
+        if( status == -1 ){
             // network error, we need to give up
         }
 
@@ -624,137 +524,122 @@ public class HdhomerunDevice implements Serializable
 
     private native int JNIgetTunerVChannel( long aCPointer, JniString aVChannel );
 
-    public int getTunerVChannel( JniString aVChannel )
-    {
+    public int getTunerVChannel( JniString aVChannel ){
         int theRetVal = JNIgetTunerVChannel( cPointer, aVChannel );
 
-        HDHomerunLogger.d( "getTunerVChannel: return val " + theRetVal + " program: " + aVChannel.getString() );
+        Timber.d( "getTunerVChannel: return val " + theRetVal + " program: " + aVChannel.getString() );
 
         return theRetVal;
     }
 
     private native String JNIgetFirmwareVersion( long cPointer2 );
 
-    public String getFirmwareVersion()
-    {
+    public String getFirmwareVersion(){
         return JNIgetFirmwareVersion( cPointer );
     }
 
     private native String JNIgetLockkeyOwner( long cPointer2 );
 
-    public String getLockkeyOwner()
-    {
+    public String getLockkeyOwner(){
         return JNIgetLockkeyOwner( cPointer );
     }
 
     private native String JNIgetTunerTarget( long cPointer2 );
 
-    public String getTargetIp()
-    {
+    public String getTargetIp(){
         return JNIgetTunerTarget( cPointer );
     }
 
     private native int JNIsetVar( long cPointer, String var, String value );
 
-    public int setVar( String var, String value )
-    {
+    public int setVar( String var, String value ){
         return JNIsetVar( cPointer, var, value );
     }
 
     private native int JNIgetVar( long cPointer, String var, JniString aValue, JniString aError );
 
-    public int getVar( String var, JniString aValue, JniString aError )
-    {
+    public int getVar( String var, JniString aValue, JniString aError ){
         return JNIgetVar( cPointer, var, aValue, aError );
     }
 
     private native int JNItunerLockeyRequest( long cPointer, JniString error );
 
-    public int tunerLockeyRequest( JniString error )
-    {
+    public int tunerLockeyRequest( JniString error ){
         int retVal = JNItunerLockeyRequest( cPointer, error );
 
-        HDHomerunLogger.d( "tunerLockeyRequest: return val " + retVal + " error: " + error.getString() );
+        Timber.d( "tunerLockeyRequest: return val " + retVal + " error: " + error.getString() );
 
         return retVal;
     }
 
     private native int JNItunerLockeyRelease( long cPointer );
 
-    public int tunerLockeyRelease()
-    {
+    public int tunerLockeyRelease(){
         int retVal = JNItunerLockeyRelease( cPointer );
 
-        HDHomerunLogger.d( "tunerLockeyRelease: return val " + retVal );
+        Timber.d( "tunerLockeyRelease: return val " + retVal );
 
         return retVal;
     }
 
     private native int JNItunerLockeyForce( long cPointer );
 
-    public int tunerLockeyForce()
-    {
+    public int tunerLockeyForce(){
         int retVal = JNItunerLockeyForce( cPointer );
 
-        HDHomerunLogger.d( "tunerLockeyForce: return val " + retVal );
+        Timber.d( "tunerLockeyForce: return val " + retVal );
 
         return retVal;
     }
 
     private native int JNIgetTunerProgram( long cPointer, JniString program );
 
-    public int getTunerProgram( JniString program )
-    {
+    public int getTunerProgram( JniString program ){
         int retVal = JNIgetTunerProgram( cPointer, program );
 
-        //HDHomerunLogger.d("getTunerProgram: return val " + retVal + " program: " + program.getString());
+        //Timber.d("getTunerProgram: return val " + retVal + " program: " + program.getString());
 
         return retVal;
     }
 
     private native int JNIsetTunerProgram( long cPointer, String progNumber );
 
-    public int setTunerProgram( String progNumber )
-    {
+    public int setTunerProgram( String progNumber ){
         int retVal = JNIsetTunerProgram( cPointer, progNumber );
 
-        HDHomerunLogger.d( "setTunerProgram: return val " + retVal );
+        Timber.d( "setTunerProgram: return val " + retVal );
 
         return retVal;
     }
 
     private native int JNIsetTunerTarget( long cPointer, String targetString );
 
-    public int setTargetIP( String targetString )
-    {
+    public int setTargetIP( String targetString ){
         int retVal = JNIsetTunerTarget( cPointer, targetString );
 
-        HDHomerunLogger.d( "setTargetIP: " + targetString + " return val " + retVal );
+        Timber.d( "setTargetIP: " + targetString + " return val " + retVal );
 
         return retVal;
     }
 
     private native void JNIstreamStop( long cPointer );
 
-    public void stopStreaming()
-    {
-        HDHomerunLogger.d( "Device: stopStreaming" );
+    public void stopStreaming(){
+        Timber.d( "Device: stopStreaming" );
         JNIstreamStop( cPointer );
     }
 
-    public CableCardStatus getCardStatus()
-    {
+    public CableCardStatus getCardStatus(){
         JniString theValue = new JniString();
         JniString theError = new JniString();
 
         int theStatus = getVar( "/card/status", theValue, theError );
 
-        HDHomerunLogger.d( "getCardStatus: theStatus = " + theStatus + " theValue = " + theValue + " theError = " + theError );
+        Timber.d( "getCardStatus: theStatus = " + theStatus + " theValue = " + theValue + " theError = " + theError );
 
         CableCardStatus theReturn = new CableCardStatus();
 
-        if( theStatus == DeviceResponse.SUCCESS )
-        {
+        if( theStatus == DeviceResponse.SUCCESS ){
             //process response
             processCardStatus( theValue, theReturn );
         }
@@ -762,34 +647,24 @@ public class HdhomerunDevice implements Serializable
         return theReturn;
     }
 
-    private void processCardStatus( JniString aValue, CableCardStatus aReturn )
-    {
+    private void processCardStatus( JniString aValue, CableCardStatus aReturn ){
         StringTokenizer theKeyValPairs = new StringTokenizer( aValue.getString(), " " );
 
-        while( theKeyValPairs.hasMoreTokens() )
-        {
+        while( theKeyValPairs.hasMoreTokens() ){
             String theKeyVal = theKeyValPairs.nextToken();
 
             int theEqualsIndex = theKeyVal.indexOf( '=' );
-            if( theEqualsIndex != -1 )
-            {
+            if( theEqualsIndex != -1 ){
                 String theKey = theKeyVal.substring( 0, theEqualsIndex );
                 String theVal = theKeyVal.substring( theEqualsIndex + 1, theKeyVal.length() );
 
-                if( theKey.equals( "card" ) )
-                {
+                if( theKey.equals( "card" ) ){
                     aReturn.setCard( theVal );
-                }
-                else if( theKey.equals( "auth" ) )
-                {
+                } else if( theKey.equals( "auth" ) ){
                     aReturn.setAuth( theVal );
-                }
-                else if( theKey.equals( "oob" ) )
-                {
+                } else if( theKey.equals( "oob" ) ){
                     aReturn.setOob( theVal );
-                }
-                else if( theKey.equals( "val" ) )
-                {
+                } else if( theKey.equals( "val" ) ){
                     aReturn.setVal( theVal );
                 }
             }

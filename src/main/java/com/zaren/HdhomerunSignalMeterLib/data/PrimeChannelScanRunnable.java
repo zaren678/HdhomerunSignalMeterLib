@@ -1,15 +1,22 @@
 package com.zaren.HdhomerunSignalMeterLib.data;
 
 import android.content.Context;
-import com.zaren.HdhomerunSignalMeterLib.util.HDHomerunLogger;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.*;
-import java.net.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URISyntaxException;
+import java.net.URL;
+
+import timber.log.Timber;
 
 public class PrimeChannelScanRunnable implements Runnable
 {   
@@ -51,12 +58,12 @@ public class PrimeChannelScanRunnable implements Runnable
          //now process the xml
          ProgramsList thePrograms = processChannelList();
          
-         HDHomerunLogger.d( "PrimeChannelScanRunnable: Num programs found is " + thePrograms.size() );
+         Timber.d( "PrimeChannelScanRunnable: Num programs found is " + thePrograms.size() );
          
          if( mDeviceController != null )
          {
             //send program list changed
-            HDHomerunLogger.d( "PrimeChannelScanRunnable: Notifying Program List Changed" );
+            Timber.d( "PrimeChannelScanRunnable: Notifying Program List Changed" );
             mDeviceController.notifyObserversProgramListChanged( thePrograms, -1 );
          }
       }
@@ -204,25 +211,26 @@ public class PrimeChannelScanRunnable implements Runnable
 
    private void downloadChannelList( URL aLineupUrl ) throws MalformedURLException, IOException, ProtocolException, FileNotFoundException, URISyntaxException
    {
-      HDHomerunLogger.d( "DownloadChannelList: URL: " + aLineupUrl );
+      Timber.d( "DownloadChannelList: URL: " + aLineupUrl );
       
       boolean theUseApache = true;
       
-      InputStream theInputStream;
+      InputStream theInputStream = null;
       
       if( theUseApache )
       {
-         HDHomerunLogger.d( "DownloadChannelList: Using Apache HTTP client" );
-         
-         HttpClient httpClient = new DefaultHttpClient();
-         HttpGet pageGet = new HttpGet( aLineupUrl.toURI() );
-         HttpResponse response = httpClient.execute( pageGet );
-         
-         theInputStream = response.getEntity().getContent();
+         Timber.d( "DownloadChannelList: Using Apache HTTP client" );
+
+         //FIXME
+//         HttpClient httpClient = new DefaultHttpClient();
+//         HttpGet pageGet = new HttpGet( aLineupUrl.toURI() );
+//         HttpResponse response = httpClient.execute( pageGet );
+//
+//         theInputStream = response.getEntity().getContent();
       }
       else
       {
-         HDHomerunLogger.d( "DownloadChannelList: Using HttpURLConnection client" );
+         Timber.d( "DownloadChannelList: Using HttpURLConnection client" );
          
          HttpURLConnection urlConnection = (HttpURLConnection) aLineupUrl.openConnection();
    
@@ -252,7 +260,7 @@ public class PrimeChannelScanRunnable implements Runnable
          downloadedSize += bufferLength;
       }
 
-      HDHomerunLogger.d( "DownloadChannelList: total download size " + downloadedSize );
+      Timber.d( "DownloadChannelList: total download size " + downloadedSize );
       
       fileOutput.close();
    }

@@ -2,7 +2,7 @@ package com.zaren.HdhomerunSignalMeterLib.data;
 
 import java.util.ArrayList;
 
-import com.zaren.HdhomerunSignalMeterLib.util.HDHomerunLogger;
+import timber.log.Timber;
 
 public class HdhomerunDiscoverDeviceArray
 {
@@ -22,7 +22,7 @@ public class HdhomerunDiscoverDeviceArray
    {      
 	  mDiscoverDeviceArray.add(new HdhomerunDiscoverDevice(ip_addr_val,type_val,id_val,tuner_id_val));
 	   
-      HDHomerunLogger.d(mDiscoverDeviceArray.get(mDiscoverDeviceArray.size()-1).toString() );
+      Timber.d( mDiscoverDeviceArray.get( mDiscoverDeviceArray.size() - 1 ).toString() );
    }
 
    public HdhomerunDiscoverDevice get( int aIndex )

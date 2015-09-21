@@ -3,10 +3,10 @@ package com.zaren.HdhomerunSignalMeterLib.data;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+
 import com.zaren.HdhomerunSignalMeterLib.events.DeviceControllerEvents;
 import com.zaren.HdhomerunSignalMeterLib.ui.IndeterminateProgressBarInt;
 import com.zaren.HdhomerunSignalMeterLib.util.ErrorHandler;
-import com.zaren.HdhomerunSignalMeterLib.util.HDHomerunLogger;
 import com.zaren.HdhomerunSignalMeterLib.util.Utils;
 
 import java.net.InetAddress;
@@ -15,13 +15,14 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.StringTokenizer;
 
+import timber.log.Timber;
+
 /**
  * this class will monitor signal strength and perform higher level functions
  *
  * @author john
  */
-public class DeviceController
-{
+public class DeviceController{
     public static final long SLEEP_TIME_BETWEEN_TASKS = 50;
     private HdhomerunDevice mDevice;
     private boolean mDeviceReady = false;
@@ -48,8 +49,7 @@ public class DeviceController
     private Context mContext;
     private CableCardStatus mCableCardStatus;
 
-    public DeviceController( HdhomerunDiscoverDevice discoverDevice, IndeterminateProgressBarInt aProgressBar, Context aContext ) throws HdhomerunCommErrorException
-    {
+    public DeviceController( HdhomerunDiscoverDevice discoverDevice, IndeterminateProgressBarInt aProgressBar, Context aContext ) throws HdhomerunCommErrorException{
         mCurrentChannelMap = "none";
         mEvents = new DeviceControllerEvents();
         mProgressBar = aProgressBar;
@@ -61,46 +61,38 @@ public class DeviceController
         setDevice( discoverDevice );
 
         // Lets kick off the main thread for the hdhomerunDevice
-        mDeviceThread = new Thread( new Runnable()
-        {
-            public void run()
-            {
-                try
-                {
+        mDeviceThread = new Thread( new Runnable(){
+            public void run(){
+                try{
                     Looper.prepare();
                     mDeviceHandler = new Handler();
                     mDeviceThreadReady = true;
 
-                    HDHomerunLogger.i( "Device Thread entering the loop" );
+                    Timber.i( "Device Thread entering the loop" );
 
                     Looper.loop();
 
-                    HDHomerunLogger.i( "Device Thread exiting gracefully" );
-                }
-                catch( Throwable t )
-                {
-                    HDHomerunLogger.e( "Device Thread halted due to an error " + t );
+                    Timber.i( "Device Thread exiting gracefully" );
+                } catch( Throwable t ) {
+                    Timber.e( "Device Thread halted due to an error " + t );
                 }
             }
         }, "Device: " + mDevice.getDeviceName() );
         mDeviceThread.start();
     }
 
-    public CableCardStatus getCableCardStatus()
-    {
+    public CableCardStatus getCableCardStatus(){
         return mCableCardStatus;
     }
 
-    public boolean isCableCardSetup()
-    {
+    public boolean isCableCardSetup(){
         CableCardStatus theStatus = getCableCardStatus();
 
-        if( theStatus == null )
-        {
+        if( theStatus == null ){
             return false;
         }
 
-        HDHomerunLogger.d( "isCableCardSetup(): " + theStatus );
+        Timber.d( "isCableCardSetup(): " + theStatus );
 
         return getDevice().getDeviceType().equals( HdhomerunDevice.DEVICE_CABLECARD ) &&
                 theStatus.getCard().equals( CableCardStatus.READY ) &&
@@ -108,29 +100,23 @@ public class DeviceController
                 ( theStatus.getOob().equals( CableCardStatus.SUCCESS ) || theStatus.getOob().equals( CableCardStatus.OOB_WEAK ) );
     }
 
-    public boolean canTranscode()
-    {
+    public boolean canTranscode(){
         return mDevice.getTranscodeProfiles() != null;
     }
 
-    public void initialize( final boolean aReportInitialStatus )
-    {
-        mDeviceHandler.post( new Runnable()
-        {
+    public void initialize( final boolean aReportInitialStatus ){
+        mDeviceHandler.post( new Runnable(){
             @Override
-            public void run()
-            {
-                HDHomerunLogger.d( "Initializing the channelmap" );
+            public void run(){
+                Timber.d( "Initializing the channelmap" );
                 // initialize the channelmap
                 final String theCurrentChannelMap = mDevice.getCurrentChannelMap();
                 mCurrentChannelMap = theCurrentChannelMap;
                 final String[] theChannelMaps = mDevice.getChannelMaps();
 
                 int theSetChannelMapIdx = -1;
-                for( int i = 0; i < theChannelMaps.length; i++ )
-                {
-                    if( theChannelMaps[ i ].equals( theCurrentChannelMap ) )
-                    {
+                for( int i = 0; i < theChannelMaps.length; i++ ){
+                    if( theChannelMaps[i].equals( theCurrentChannelMap ) ){
                         theSetChannelMapIdx = i;
                     }
                 }
@@ -144,29 +130,23 @@ public class DeviceController
                 notifyChannelMapListChanged( theChannelMaps );
 
                 DeviceResponse theResponse = new DeviceResponse( DeviceResponse.SUCCESS );
-                if( theChannelMapIdx > -1 && theChannelMapIdx < theChannelMaps.length )
-                {
-                    HDHomerunLogger.d( "Setting initial channelmap spinner to " + theChannelMapIdx + " " + theCurrentChannelMap );
+                if( theChannelMapIdx > -1 && theChannelMapIdx < theChannelMaps.length ){
+                    Timber.d( "Setting initial channelmap spinner to " + theChannelMapIdx + " " + theCurrentChannelMap );
                     mCurrentChannelMap = theCurrentChannelMap;
 
-                    if( aReportInitialStatus )
-                    {
+                    if( aReportInitialStatus ){
                         notifyChannelMapChanged( theResponse, theCurrentChannelMap );
                     }
-                }
-                else
-                {
-                    HDHomerunLogger.d( "No initial channelmap" );
-                    mCurrentChannelMap = theChannelMaps[ 0 ];
-                    if( aReportInitialStatus )
-                    {
-                        notifyChannelMapChanged( theResponse, theChannelMaps[ 0 ] );
+                } else {
+                    Timber.d( "No initial channelmap" );
+                    mCurrentChannelMap = theChannelMaps[0];
+                    if( aReportInitialStatus ){
+                        notifyChannelMapChanged( theResponse, theChannelMaps[0] );
                     }
                 }
 
                 //get Card status if this is a prime device
-                if( mDevice.getDeviceType().equals( HdhomerunDevice.DEVICE_CABLECARD ) )
-                {
+                if( mDevice.getDeviceType().equals( HdhomerunDevice.DEVICE_CABLECARD ) ){
                     mCableCardStatus = mDevice.getCardStatus();
                 }
 
@@ -182,8 +162,7 @@ public class DeviceController
 
                 notifyObserversProgramListChanged( thePrograms, theInitialChannel );
 
-                if( theIntialProgram > 0 && aReportInitialStatus )
-                {
+                if( theIntialProgram > 0 && aReportInitialStatus ){
                     notifyObserversProgramChanged( theResponse, thePrograms.get( theIntialProgram ) );
                 }
 
@@ -191,31 +170,23 @@ public class DeviceController
 
                 // Seems like the device needs a little time before it does
                 // something else here
-                try
-                {
+                try{
                     Thread.sleep( SLEEP_TIME_BETWEEN_TASKS );
-                }
-                catch( InterruptedException e )
-                {
+                } catch( InterruptedException e ) {
                     e.printStackTrace();
                 }
             }
         } );
     }
 
-    private int ParseProgram( final JniString aProgram )
-    {
+    private int ParseProgram( final JniString aProgram ){
         String theProgramStr = aProgram.getString();
 
         StringTokenizer theTokenizer = new StringTokenizer( theProgramStr );
-        if( theTokenizer.countTokens() > 0 )
-        {
-            try
-            {
+        if( theTokenizer.countTokens() > 0 ){
+            try{
                 return Integer.parseInt( theTokenizer.nextToken() );
-            }
-            catch( NumberFormatException e )
-            {
+            } catch( NumberFormatException e ) {
                 return 0;
             }
         }
@@ -223,16 +194,14 @@ public class DeviceController
         return 0;
     }
 
-    public void startTunerStatusUpdates()
-    {
-        HDHomerunLogger.d( "startTunerStatusUpdates: deviceHandler " + mDeviceHandler );
+    public void startTunerStatusUpdates(){
+        Timber.d( "startTunerStatusUpdates: deviceHandler " + mDeviceHandler );
 
         mTunerStatusTaskRunning = true;
         mDeviceHandler.post( new TunerStatusRunnable() );
     }
 
-    public synchronized void requestStop()
-    {
+    public synchronized void requestStop(){
         // using the handler, post a Runnable that will quit()
         // the Looper attached to our DownloadThread
         // obviously, all previously queued tasks will be executed
@@ -240,57 +209,46 @@ public class DeviceController
 
         mDeviceHandler.removeCallbacksAndMessages( null );
 
-        if( mDeviceThread.isAlive() == true )
-        {
-            mDeviceHandler.post( new Runnable()
-            {
+        if( mDeviceThread.isAlive() == true ){
+            mDeviceHandler.post( new Runnable(){
                 @Override
-                public void run()
-                {
-                    HDHomerunLogger.i( "Device Thread loop quitting by request" );
+                public void run(){
+                    Timber.i( "Device Thread loop quitting by request" );
 
                     Looper.myLooper().quit();
                 }
             } );
 
             // now join the thread to make sure we're stopped
-            try
-            {
+            try{
                 mDeviceThread.join();
-            }
-            catch( InterruptedException e )
-            {
+            } catch( InterruptedException e ) {
                 e.printStackTrace();
             }
         }
     }
 
-    synchronized public void setChannelMap( String newMap )
-    {
-        if( mDeviceReady == false )
-        {
+    synchronized public void setChannelMap( String newMap ){
+        if( mDeviceReady == false ){
             return;
         }
 
-        HDHomerunLogger.d( "setChannelMap: newMap " + newMap );
+        Timber.d( "setChannelMap: newMap " + newMap );
 
         setProgressBarBusy( true );
 
         mDeviceHandler.post( new SetChannelMapRunnable( newMap ) );
     }
 
-    private class SetChannelMapRunnable implements Runnable
-    {
+    private class SetChannelMapRunnable implements Runnable{
         private String mNewMap;
 
-        public SetChannelMapRunnable( String aNewMap )
-        {
+        public SetChannelMapRunnable( String aNewMap ){
             mNewMap = aNewMap;
         }
 
         @Override
-        public void run()
-        {
+        public void run(){
             String thePrevChannelMap;
             boolean tunerLocked = false;
             JniString theError = new JniString();
@@ -298,52 +256,42 @@ public class DeviceController
             DeviceResponse theResponse = new DeviceResponse( DeviceResponse.SUCCESS );
             theResponse.putString( DeviceResponse.KEY_ACTION, "setting channel map" );
 
-            if( mStopNow == true )
-            {
+            if( mStopNow == true ){
                 return;
             }
 
-            try
-            {
+            try{
                 theResponse.setStatus( mDevice.tunerLockeyRequest( theError ) );
 
-                if( theResponse.getStatus() > 0 )
-                {
+                if( theResponse.getStatus() > 0 ){
                     tunerLocked = true;
 
                     // set the new map
                     thePrevChannelMap = mDevice.getCurrentChannelMap();
 
-                    HDHomerunLogger.d( "SetChannelMapRunnable: new map: " + mNewMap + " old map: " + thePrevChannelMap );
+                    Timber.d( "SetChannelMapRunnable: new map: " + mNewMap + " old map: " + thePrevChannelMap );
 
-                    if( !mNewMap.equals( thePrevChannelMap ) )
-                    {
+                    if( !mNewMap.equals( thePrevChannelMap ) ){
                         theResponse.setStatus( mDevice.setChannelMap( mNewMap ) );
 
-                        if( theResponse.getStatus() > 0 )
-                        {
+                        if( theResponse.getStatus() > 0 ){
                             mDevice.createChannelList( mNewMap, DeviceController.this.getChannelList() );
 
-                            HDHomerunLogger.d( DeviceController.this.getChannelList().toString() );
+                            Timber.d( DeviceController.this.getChannelList().toString() );
 
                             mCurrentChannelMap = mNewMap;
 
                         }
                     }
-                }
-                else
-                {
+                } else {
                     // Tuner was locked
-                    HDHomerunLogger.d( "SetChannelMapRunnable: " + theError );
+                    Timber.d( "SetChannelMapRunnable: " + theError );
 
                     fillOutLockedResponse( theResponse );
                 }
 
-            }
-            finally
-            {
-                if( tunerLocked )
-                {
+            } finally {
+                if( tunerLocked ){
                     mDevice.tunerLockeyRelease();
                 }
 
@@ -352,33 +300,27 @@ public class DeviceController
 
                 // Seems like the device needs a little time before it does
                 // something else here
-                try
-                {
+                try{
                     Thread.sleep( SLEEP_TIME_BETWEEN_TASKS );
-                }
-                catch( InterruptedException e )
-                {
+                } catch( InterruptedException e ) {
                     e.printStackTrace();
                 }
             }
         }
     }
 
-    private class TunerStatusRunnable implements Runnable
-    {
+    private class TunerStatusRunnable implements Runnable{
         @Override
-        public void run()
-        {
-            if( mStopNow == true )
-            {
+        public void run(){
+            if( mStopNow == true ){
                 return;
             }
 
-            HDHomerunLogger.v( "Update Tuner Status: device id: " + mDevice.getDeviceName() );
+            Timber.v( "Update Tuner Status: device id: " + mDevice.getDeviceName() );
 
             mDevice.updateTunerStatus( mTunerStatus );
 
-            HDHomerunLogger.v( "Update Tuner Status: return status " + mTunerStatus.returnStatus );
+            Timber.v( "Update Tuner Status: return status " + mTunerStatus.returnStatus );
 
             final DeviceResponse theResponse = new DeviceResponse( mTunerStatus.returnStatus );
             theResponse.putString( DeviceResponse.KEY_ACTION, "Getting Tuner Status" );
@@ -387,25 +329,20 @@ public class DeviceController
             theResponse.setStatus( mDevice.getTunerChannel( theChannel ) );
 
             final CurrentChannelAndProgram theCurrentChannel = new CurrentChannelAndProgram();
-            if( theResponse.getStatus() == DeviceResponse.SUCCESS )
-            {
+            if( theResponse.getStatus() == DeviceResponse.SUCCESS ){
                 String theRetChannel = theChannel.getString();
                 theCurrentChannel.setChannel( theRetChannel );
 
                 JniString theProgram = new JniString();
                 theResponse.setStatus( mDevice.getTunerProgram( theProgram ) );
 
-                if( theResponse.getStatus() == DeviceResponse.SUCCESS )
-                {
+                if( theResponse.getStatus() == DeviceResponse.SUCCESS ){
                     int theRetProgram = 0;
 
-                    try
-                    {
+                    try{
                         theRetProgram = ParseProgram( theProgram );
-                    }
-                    catch( NumberFormatException e )
-                    {
-                        HDHomerunLogger.d( "Failed to parse program num from string " + theProgram );
+                    } catch( NumberFormatException e ) {
+                        Timber.d( "Failed to parse program num from string " + theProgram );
                     }
 
                     theCurrentChannel.setProgramNum( theRetProgram );
@@ -417,35 +354,29 @@ public class DeviceController
                 }
             }
 
-            mUiHandler.post( new Runnable()
-            {
+            mUiHandler.post( new Runnable(){
                 @Override
-                public void run()
-                {
+                public void run(){
                     notifyObserversTunerStatus( theResponse, mTunerStatus, theCurrentChannel );
                 }
             } );
 
             // schedule the next run
-            if( mTunerStatusTaskRunning == true )
-            {
+            if( mTunerStatusTaskRunning == true ){
                 mDeviceHandler.postDelayed( new TunerStatusRunnable(), mStatusUpdateTime );
             }
         }
     }
 
-    public void setDevice( HdhomerunDiscoverDevice discoverDevice ) throws HdhomerunCommErrorException
-    {
+    public void setDevice( HdhomerunDiscoverDevice discoverDevice ) throws HdhomerunCommErrorException{
         // Clean up the old HDHR Device
-        if( mDevice != null )
-        {
+        if( mDevice != null ){
             mDevice.destroy();
             mDevice = null;
         }
 
         // create new device
-        try
-        {
+        try{
             mDevice = new HdhomerunDevice( discoverDevice.id, discoverDevice.ip_addr, discoverDevice.tuner_id );
 
             mDeviceReady = true;
@@ -454,7 +385,7 @@ public class DeviceController
             String currentChannelMap = mDevice.getCurrentChannelMap();
             mDevice.createChannelList( currentChannelMap, mChannelList );
 
-            HDHomerunLogger.d( getChannelList().toString() );
+            Timber.d( getChannelList().toString() );
 
             // get the tuner status to set the channelEditText and channelMap
             mDevice.updateTunerStatus( mTunerStatus );
@@ -464,12 +395,9 @@ public class DeviceController
             DeviceResponse theResponse = new DeviceResponse( DeviceResponse.SUCCESS );
             notifyObserversChannelChanged( theResponse, channel );
 
-        }
-        catch( HdhomerunCommErrorException e )
-        {
-            HDHomerunLogger.e( "Communications Error while setting up device" );
-            if( mDevice != null )
-            {
+        } catch( HdhomerunCommErrorException e ) {
+            Timber.e( "Communications Error while setting up device" );
+            if( mDevice != null ){
                 mDevice.destroy();
                 mDevice = null;
             }
@@ -478,126 +406,95 @@ public class DeviceController
         }
     }
 
-    public void setTunerChannel( String aChannel, boolean aIsVirtualTune )
-    {
-        if( mDevice == null )
-        {
+    public void setTunerChannel( String aChannel, boolean aIsVirtualTune ){
+        if( mDevice == null ){
             ErrorHandler.HandleError( "No Device Set" );
             return;
         }
 
-        if( mDevice.getcPointer() == -1 )
-        {
+        if( mDevice.getcPointer() == -1 ){
             ErrorHandler.HandleError( "No Device Set" );
             return;
         }
 
-        if( mDeviceReady == false )
-        {
+        if( mDeviceReady == false ){
             return;
         }
 
         String theDeviceType = mDevice.getDeviceType();
-        if( theDeviceType.equals( HdhomerunDevice.DEVICE_ATSC ) )
-        {
-            try
-            {
+        if( theDeviceType.equals( HdhomerunDevice.DEVICE_ATSC ) ){
+            try{
                 int theChannel = Integer.parseInt( aChannel );
-                if( ( theChannel > mChannelList.getMaxNumber() ) || ( theChannel < mChannelList.getMinNumber() ) )
-                {
+                if( ( theChannel > mChannelList.getMaxNumber() ) || ( theChannel < mChannelList.getMinNumber() ) ){
                     ErrorHandler.HandleError( "Channel Out of Range: Valid range for this channelmap is " + mChannelList.getMinNumber() + " to " + mChannelList.getMaxNumber() );
                     return;
-                }
-                else
-                {
-                    HDHomerunLogger.d( "setTunerChannel: channel " + theChannel );
+                } else {
+                    Timber.d( "setTunerChannel: channel " + theChannel );
 
                     setProgressBarBusy( true );
                     mDeviceHandler.post( new SetChannelRunnable( this, theChannel ) );
                 }
+            } catch( NumberFormatException e ) {
+                Timber.e( "setTunerChannel: Failed to parse channel: " + e );
             }
-            catch( NumberFormatException e )
-            {
-                HDHomerunLogger.e( "setTunerChannel: Failed to parse channel: " + e );
-            }
-        }
-        else if( theDeviceType.equals( HdhomerunDevice.DEVICE_CABLECARD ) ||
-                 theDeviceType.equals( HdhomerunDevice.DEVICE_TC_ATSC ) )
-        {
-            if( aIsVirtualTune == true )
-            {
+        } else if( theDeviceType.equals( HdhomerunDevice.DEVICE_CABLECARD ) ||
+                theDeviceType.equals( HdhomerunDevice.DEVICE_TC_ATSC ) ){
+            if( aIsVirtualTune == true ){
                 // this means its a virtual channel number
                 setProgressBarBusy( true );
                 mDeviceHandler.post( new SetVChannelRunnable( this, aChannel ) );
-            }
-            else
-            {
-                try
-                {
+            } else {
+                try{
                     int theChannel = Integer.parseInt( aChannel );
-                    if( ( theChannel > mChannelList.getMaxNumber() ) || ( theChannel < mChannelList.getMinNumber() ) )
-                    {
+                    if( ( theChannel > mChannelList.getMaxNumber() ) || ( theChannel < mChannelList.getMinNumber() ) ){
                         ErrorHandler.HandleError( "Channel Out of Range: Valid range for this channelmap is " + mChannelList.getMinNumber() + " to " + mChannelList.getMaxNumber() );
                         return;
-                    }
-                    else
-                    {
-                        HDHomerunLogger.d( "setTunerChannel: channel " + theChannel );
+                    } else {
+                        Timber.d( "setTunerChannel: channel " + theChannel );
 
                         mProgressBar.setProgressBarBusy( true );
                         mDeviceHandler.post( new SetChannelRunnable( this, theChannel ) );
                     }
-                }
-                catch( NumberFormatException e )
-                {
-                    HDHomerunLogger.e( "setTunerChannel: Failed to parse channel: " + e );
+                } catch( NumberFormatException e ) {
+                    Timber.e( "setTunerChannel: Failed to parse channel: " + e );
                 }
             }
         }
     }
 
-    public void cancelChannelScan()
-    {
-        if( mChannelScanTask != null )
-        {
+    public void cancelChannelScan(){
+        if( mChannelScanTask != null ){
             mChannelScanTask.stop();
         }
     }
 
-    public void channelScanForward()
-    {
+    public void channelScanForward(){
         channelScanForward( -1 );
     }
 
-    public void channelScanForward( int aStartingChannel )
-    {
-        if( mDevice == null )
-        {
+    public void channelScanForward( int aStartingChannel ){
+        if( mDevice == null ){
             ErrorHandler.HandleError( "No Device Set" );
             return;
         }
 
-        if( mDevice.getcPointer() == -1 )
-        {
+        if( mDevice.getcPointer() == -1 ){
             ErrorHandler.HandleError( "No Device Set" );
             return;
         }
 
-        if( mDeviceReady == false )
-        {
+        if( mDeviceReady == false ){
             return;
         }
 
         // if the channelscan is already running forward then don't do anything
-        if( ( mChannelScanTask != null ) && ( mChannelScanTask.isRunning() == true ) && ( mChannelScanTask.isForward() == true ) )
-        {
+        if( ( mChannelScanTask != null ) && ( mChannelScanTask.isRunning() == true ) && ( mChannelScanTask.isForward() == true ) ){
             return;
         }
 
         // if the channelscan is already running but running backward then stop
         // the channel scan
-        if( ( mChannelScanTask != null ) && ( mChannelScanTask.isRunning() == true ) && ( mChannelScanTask.isForward() == false ) )
-        {
+        if( ( mChannelScanTask != null ) && ( mChannelScanTask.isRunning() == true ) && ( mChannelScanTask.isForward() == false ) ){
             mChannelScanTask.stop();
             return;
         }
@@ -607,79 +504,64 @@ public class DeviceController
         mDeviceHandler.post( mChannelScanTask );
     }
 
-    public void fullChannelScan()
-    {
-        if( mChannelScanTask != null && mChannelScanTask.isRunning() )
-        {
+    public void fullChannelScan(){
+        if( mChannelScanTask != null && mChannelScanTask.isRunning() ){
             return;
         }
 
-        HDHomerunLogger.d( "Full Channel scan" );
+        Timber.d( "Full Channel scan" );
 
         setProgressBarBusy( true );
 
-        if( isCableCardSetup() )
-        {
-            HDHomerunLogger.d( "Full Channel scan: Cablecard is setup" );
-            try
-            {
+        if( isCableCardSetup() ){
+            Timber.d( "Full Channel scan: Cablecard is setup" );
+            try{
                 int theIpVal = getDevice().getIpAddr();
                 String theIpAddr = Utils.HdHrIpAddressToString( theIpVal );
 
                 URL theUrl = new URL( "http://" + theIpAddr + "/lineup.xml?show=unprotected" );
 
-                HDHomerunLogger.d( "Full Channel scan: URL is " + theUrl );
+                Timber.d( "Full Channel scan: URL is " + theUrl );
 
                 mDeviceHandler.post( new PrimeChannelScanRunnable( this, mContext, theUrl ) );
-            }
-            catch( MalformedURLException e )
-            {
+            } catch( MalformedURLException e ) {
                 //SEND FAIL
                 setProgressBarBusy( false );
                 notifyChannelScanComplete( new DeviceResponse( DeviceResponse.FAILURE ) );
             }
-        }
-        else
-        {
-            HDHomerunLogger.d( "Full Channel scan: Cablecard is not setup" );
+        } else {
+            Timber.d( "Full Channel scan: Cablecard is not setup" );
             mChannelScanTask = new ChannelScanRunnable( this, mChannelList );
             mDeviceHandler.post( mChannelScanTask );
         }
     }
 
-    public void channelScanBackward()
-    {
+    public void channelScanBackward(){
         channelScanBackward( -1 );
     }
 
-    public void channelScanBackward( int aStartingChannel )
-    {
-        if( mDevice == null )
-        {
+    public void channelScanBackward( int aStartingChannel ){
+        if( mDevice == null ){
             ErrorHandler.HandleError( "No Device Set" );
             return;
         }
 
-        if( mDevice.getcPointer() == -1 )
-        {
+        if( mDevice.getcPointer() == -1 ){
             ErrorHandler.HandleError( "No Device Set" );
             return;
         }
 
-        if( mDeviceReady == false )
-        {
+        if( mDeviceReady == false ){
             return;
         }
 
         // if the channelscan is already running backward then don't do anything
-        if( ( mChannelScanTask != null ) && ( mChannelScanTask.isRunning() == true ) && ( mChannelScanTask.isForward() == false ) )
-        {
+        if( ( mChannelScanTask != null ) && ( mChannelScanTask.isRunning() == true ) && ( mChannelScanTask.isForward() == false ) ){
             return;
         }
 
         // if the channelscan is already running but running forward then stop it
-        if( ( mChannelScanTask != null ) && ( mChannelScanTask.isRunning() == true ) && ( mChannelScanTask.isForward() == true ) )
-        {
+        if( ( mChannelScanTask != null ) && ( mChannelScanTask.isRunning() == true ) && ( mChannelScanTask.isForward() == true ) ){
             mChannelScanTask.stop();
             return;
         }
@@ -689,20 +571,16 @@ public class DeviceController
         mDeviceHandler.post( mChannelScanTask );
     }
 
-    public void stopTunerStatusUpdates()
-    {
+    public void stopTunerStatusUpdates(){
         mTunerStatusTaskRunning = false;
     }
 
-    public boolean isTunerStatusUpdatesRunning()
-    {
+    public boolean isTunerStatusUpdatesRunning(){
         return mTunerStatusTaskRunning;
     }
 
-    public void destroyDevice()
-    {
-        if( mDevice != null )
-        {
+    public void destroyDevice(){
+        if( mDevice != null ){
             mDevice.tunerLockeyRelease();
             mDevice.destroy();
         }
@@ -714,48 +592,40 @@ public class DeviceController
     /**
      * @param channelList the channelList to set
      */
-    public void setChannelList( ChannelList channelList )
-    {
+    public void setChannelList( ChannelList channelList ){
         this.mChannelList = channelList;
     }
 
     /**
      * @return the channelList
      */
-    public ChannelList getChannelList()
-    {
+    public ChannelList getChannelList(){
         return mChannelList;
     }
 
     /**
      * @return the device
      */
-    public HdhomerunDevice getDevice()
-    {
+    public HdhomerunDevice getDevice(){
         return mDevice;
     }
 
-    public void setProgram( int aProgramNumber )
-    {
+    public void setProgram( int aProgramNumber ){
         setProgram( aProgramNumber, null );
     }
 
-    public void setProgram( int aProgramNumber, String aTranscodeProfile )
-    {
-        if( mDevice == null )
-        {
+    public void setProgram( int aProgramNumber, String aTranscodeProfile ){
+        if( mDevice == null ){
             ErrorHandler.HandleError( "No Device Set" );
             return;
         }
 
-        if( mDevice.getcPointer() == -1 )
-        {
+        if( mDevice.getcPointer() == -1 ){
             ErrorHandler.HandleError( "No Device Set" );
             return;
         }
 
-        if( mDeviceReady == false )
-        {
+        if( mDeviceReady == false ){
             return;
         }
 
@@ -766,13 +636,11 @@ public class DeviceController
     /**
      * @author john
      */
-    public class SetProgramRunnable implements Runnable
-    {
+    public class SetProgramRunnable implements Runnable{
         private final String mTranscodeProfile;
         private int mProgram;
 
-        public SetProgramRunnable( int aProgramNumber, String aTrancodeProfile )
-        {
+        public SetProgramRunnable( int aProgramNumber, String aTrancodeProfile ){
             mProgram = aProgramNumber;
             mTranscodeProfile = aTrancodeProfile;
         }
@@ -783,13 +651,11 @@ public class DeviceController
          * @see java.lang.Runnable#run()
          */
         @Override
-        public void run()
-        {
+        public void run(){
             int theStatus;
             JniString theError = new JniString();
 
-            if( mStopNow == true )
-            {
+            if( mStopNow == true ){
                 return;
             }
 
@@ -808,26 +674,21 @@ public class DeviceController
             ChannelScanProgram thePrevProgram = null;
 
             ChannelScanProgram theNewProgram = null;
-            for( ChannelScanProgram theProg : thePrograms )
-            {
-                if( theProg.programNumber == thePrevProgramNum )
-                {
+            for( ChannelScanProgram theProg : thePrograms ){
+                if( theProg.programNumber == thePrevProgramNum ){
                     thePrevProgram = theProg;
                 }
 
-                if( theProg.programNumber == mProgram )
-                {
+                if( theProg.programNumber == mProgram ){
                     theNewProgram = theProg;
                 }
             }
 
-            if( theStatus > 0 )
-            {
+            if( theStatus > 0 ){
                 String theProgram = mProgram + "";
 
                 if( mDevice.getTranscodeProfiles() != null &&
-                    mTranscodeProfile != null )
-                {
+                        mTranscodeProfile != null ){
                     theProgram += " transcode=" + mTranscodeProfile;
                 }
 
@@ -835,11 +696,9 @@ public class DeviceController
                 mDevice.tunerLockeyRelease();
 
                 notifyObserversProgramChanged( theResponse, theNewProgram );
-            }
-            else
-            {
+            } else {
                 // Tuner was locked
-                HDHomerunLogger.d( "SetProgramRunnable: " + theError );
+                Timber.d( "SetProgramRunnable: " + theError );
 
                 fillOutLockedResponse( theResponse );
 
@@ -850,12 +709,9 @@ public class DeviceController
 
             // Seems like the device needs a little time before it does something
             // else here
-            try
-            {
+            try{
                 Thread.sleep( SLEEP_TIME_BETWEEN_TASKS );
-            }
-            catch( InterruptedException e )
-            {
+            } catch( InterruptedException e ) {
                 e.printStackTrace();
             }
 
@@ -863,35 +719,28 @@ public class DeviceController
 
     }
 
-    public int setTargetIP( String protocol, String serverIpAddress, int serverVideoPort ) throws UnknownHostException
-    {
+    public int setTargetIP( String protocol, String serverIpAddress, int serverVideoPort ) throws UnknownHostException{
 
         InetAddress address = InetAddress.getByName( serverIpAddress );
 
         return mDevice.setTargetIP( protocol + "://" + address.getHostAddress() + ":" + serverVideoPort );
     }
 
-    public String getCurrentChannelMap()
-    {
+    public String getCurrentChannelMap(){
         return mCurrentChannelMap;
     }
 
-    public void fillOutLockedResponse( DeviceResponse aResponse )
-    {
+    public void fillOutLockedResponse( DeviceResponse aResponse ){
         String theOwner = mDevice.getLockkeyOwner();
         aResponse.putString( DeviceResponse.KEY_ERROR, "tuner Locked by " + theOwner );
         aResponse.putBoolean( DeviceResponse.KEY_LOCKED, true );
     }
 
-    public void notifyObserversTunerStatus( final DeviceResponse aResponse, final TunerStatus aTunerStatus, final CurrentChannelAndProgram aCurrentChannel )
-    {
-        if( !aTunerStatus.equals( mPreviousTunerStatus ) )
-        {
-            mUiHandler.post( new Runnable()
-            {
+    public void notifyObserversTunerStatus( final DeviceResponse aResponse, final TunerStatus aTunerStatus, final CurrentChannelAndProgram aCurrentChannel ){
+        if( !aTunerStatus.equals( mPreviousTunerStatus ) ){
+            mUiHandler.post( new Runnable(){
                 @Override
-                public void run()
-                {
+                public void run(){
                     mEvents.notifyTunerStatusChanged( aResponse, DeviceController.this, aTunerStatus, aCurrentChannel );
                 }
             } );
@@ -899,108 +748,82 @@ public class DeviceController
         mPreviousTunerStatus.clone( mTunerStatus );
     }
 
-    public void notifyObserversProgramListChanged( final ProgramsList thePrograms, final int theChannel )
-    {
-        mUiHandler.post( new Runnable()
-        {
+    public void notifyObserversProgramListChanged( final ProgramsList thePrograms, final int theChannel ){
+        mUiHandler.post( new Runnable(){
             @Override
-            public void run()
-            {
+            public void run(){
                 mEvents.notifyProgramListChanged( DeviceController.this, thePrograms, theChannel );
             }
         } );
     }
 
-    public void notifyChannelLocked( final TunerStatus aTunerStatus )
-    {
-        mUiHandler.post( new Runnable()
-        {
+    public void notifyChannelLocked( final TunerStatus aTunerStatus ){
+        mUiHandler.post( new Runnable(){
             @Override
-            public void run()
-            {
+            public void run(){
                 mEvents.notifyChannelLocked( DeviceController.this, aTunerStatus );
             }
         } );
     }
 
-    public void notifyChannelScanComplete( final DeviceResponse aResponse )
-    {
-        mUiHandler.post( new Runnable()
-        {
+    public void notifyChannelScanComplete( final DeviceResponse aResponse ){
+        mUiHandler.post( new Runnable(){
             @Override
-            public void run()
-            {
+            public void run(){
                 mEvents.notifyChannelScanComplete( aResponse, DeviceController.this );
             }
         } );
     }
 
-    private void notifyChannelMapChanged( final DeviceResponse theResponse, final String aNewChannelMap )
-    {
-        mUiHandler.post( new Runnable()
-        {
+    private void notifyChannelMapChanged( final DeviceResponse theResponse, final String aNewChannelMap ){
+        mUiHandler.post( new Runnable(){
             @Override
-            public void run()
-            {
+            public void run(){
                 mEvents.notifyChannelMapChanged( theResponse, DeviceController.this, aNewChannelMap );
             }
         } );
     }
 
-    private void notifyChannelMapListChanged( final String[] aChannelMapArray )
-    {
-        mUiHandler.post( new Runnable()
-        {
+    private void notifyChannelMapListChanged( final String[] aChannelMapArray ){
+        mUiHandler.post( new Runnable(){
             @Override
-            public void run()
-            {
+            public void run(){
                 mEvents.notifyChannelMapListChanged( DeviceController.this, aChannelMapArray );
             }
         } );
     }
 
-    public void notifyObserversProgramChanged( final DeviceResponse aResponse, final ChannelScanProgram aChannelScanProgram )
-    {
-        mUiHandler.post( new Runnable()
-        {
+    public void notifyObserversProgramChanged( final DeviceResponse aResponse, final ChannelScanProgram aChannelScanProgram ){
+        mUiHandler.post( new Runnable(){
             @Override
-            public void run()
-            {
+            public void run(){
                 mEvents.notifyProgramChanged( aResponse, DeviceController.this, aChannelScanProgram );
             }
         } );
     }
 
-    public void notifyObserversChannelChanged( final DeviceResponse aResponse, final int aChannel )
-    {
-        mUiHandler.post( new Runnable()
-        {
+    public void notifyObserversChannelChanged( final DeviceResponse aResponse, final int aChannel ){
+        mUiHandler.post( new Runnable(){
             @Override
-            public void run()
-            {
+            public void run(){
                 mEvents.notifyChannelChanged( aResponse, DeviceController.this, aChannel );
             }
         } );
     }
 
-    public void setProgressBarBusy( final boolean aIsBusy )
-    {
-        mUiHandler.post( new Runnable()
-        {
+    public void setProgressBarBusy( final boolean aIsBusy ){
+        mUiHandler.post( new Runnable(){
             @Override
-            public void run()
-            {
+            public void run(){
                 mProgressBar.setProgressBarBusy( aIsBusy );
             }
         } );
     }
 
-    public void setProgressBar( IndeterminateProgressBarInt aProgress )
-    {
+    public void setProgressBar( IndeterminateProgressBarInt aProgress ){
         boolean theBusy = false;
 
-        if( mProgressBar != null )
-        {
+        if( mProgressBar != null ){
             theBusy = mProgressBar.getProgressBarBusy();
         }
 
@@ -1009,29 +832,22 @@ public class DeviceController
         setProgressBarBusy( theBusy );
     }
 
-    public void setContext( Context aContext )
-    {
+    public void setContext( Context aContext ){
         mContext = aContext;
     }
 
-    public DeviceControllerEvents events()
-    {
+    public DeviceControllerEvents events(){
         return mEvents;
     }
 
-    public void waitForDeviceReady()
-    {
-        while( mDeviceReady != true && mDeviceThreadReady != true && mDeviceHandler == null )
-        {
+    public void waitForDeviceReady(){
+        while( mDeviceReady != true && mDeviceThreadReady != true && mDeviceHandler == null ){
             ;
         }
 
-        try
-        {
+        try{
             Thread.sleep( SLEEP_TIME_BETWEEN_TASKS );
-        }
-        catch( InterruptedException e )
-        {
+        } catch( InterruptedException e ) {
             e.printStackTrace();
         }
     }
