@@ -1,12 +1,12 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 21
+    compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion "28.0.2"
 
     defaultConfig {
-        minSdkVersion 7
-        targetSdkVersion 21
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.compileSdkVersion
         versionCode 1
         versionName "1.0"
     }
@@ -29,5 +29,5 @@ android {
 }
 
 dependencies {
-    implementation "com.android.support:support-v4:21.0.3"
+    //implementation "com.android.support:support-compat:${rootProject.ext.supportLibVersion}"
 }
