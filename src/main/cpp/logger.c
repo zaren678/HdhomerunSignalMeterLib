@@ -14,7 +14,7 @@ void my_log_print(const android_LogPriority level, const char* format, ...)
 {
    int status;
    JNIEnv *env;
-   bool_t isAttached = FALSE;
+   bool isAttached = false;
    char buffer[MAX_BUFFER];
          
    va_list args;
@@ -34,7 +34,7 @@ void my_log_print(const android_LogPriority level, const char* format, ...)
                  "current thread");
          return;
       }
-      isAttached = TRUE;
+      isAttached = true;
    }
    
    jclass loggerClass = (*env)->FindClass(env,"com/zaren/HdhomerunSignalMeterLib/util/HDHomerunLogger");

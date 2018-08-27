@@ -39,7 +39,7 @@ Java_com_zaren_HdhomerunSignalMeterLib_data_DiscoverTask_discover( JNIEnv* env,
    jmethodID insertId = (*env)->GetMethodID(env,discoverDeviceArrayClass,"insert","(IJJI)V");   
    jobject retObj = (*env)->NewObject(env, discoverDeviceArrayClass, constructorId);
 
-	num_found = hdhomerun_discover_find_devices_custom(0, HDHOMERUN_DEVICE_TYPE_TUNER, HDHOMERUN_DEVICE_ID_WILDCARD, discover_array, 10);
+	num_found = hdhomerun_discover_find_devices_custom_v2(0, HDHOMERUN_DEVICE_TYPE_TUNER, HDHOMERUN_DEVICE_ID_WILDCARD, discover_array, 10);
 
 	MY_LOGD("discover(): num_found %d",num_found );
 	
@@ -281,10 +281,10 @@ JNIEXPORT jint JNICALL Java_com_zaren_HdhomerunSignalMeterLib_data_HdhomerunDevi
 }
 
 //TODO USE REAL LIBRARY CHANNEL SCAN
-int detectPrograms( struct hdhomerun_device_t* device, struct hdhomerun_channelscan_result_t *result, bool_t *pchanged, bool_t *pincomplete )
+int detectPrograms( struct hdhomerun_device_t* device, struct hdhomerun_channelscan_result_t *result, bool *pchanged, bool *pincomplete )
 {   
-   	*pchanged = FALSE;
-	*pincomplete = FALSE;
+	*pchanged = false;
+	*pincomplete = false;
 
 	char *streaminfo;
 	int ret = hdhomerun_device_get_tuner_streaminfo(device, &streaminfo);
@@ -306,8 +306,15 @@ int detectPrograms( struct hdhomerun_device_t* device, struct hdhomerun_channels
 
 		unsigned int transport_stream_id;
 		if (sscanf(line, "tsid=0x%x", &transport_stream_id) == 1) {
-			result->transport_stream_id = transport_stream_id;
-			result->transport_stream_id_detected = TRUE;
+			result->transport_stream_id = (uint16_t)transport_stream_id;
+			result->transport_stream_id_detected = true;
+			continue;
+		}
+
+		unsigned int original_network_id;
+		if (sscanf(line, "onid=0x%x", &original_network_id) == 1) {
+			result->original_network_id = (uint16_t)original_network_id;
+			result->original_network_id_detected = true;
 			continue;
 		}
 
@@ -318,8 +325,7 @@ int detectPrograms( struct hdhomerun_device_t* device, struct hdhomerun_channels
 		struct hdhomerun_channelscan_program_t program;
 		memset(&program, 0, sizeof(program));
 
-		strncpy(program.program_str, line, sizeof(program.program_str));
-		program.program_str[sizeof(program.program_str) - 1] = 0;
+		hdhomerun_sprintf(program.program_str, program.program_str + sizeof(program.program_str), "%s", line);
 
 		unsigned int program_number;
 		unsigned int virtual_major, virtual_minor;
@@ -330,9 +336,9 @@ int detectPrograms( struct hdhomerun_device_t* device, struct hdhomerun_channels
 			virtual_minor = 0;
 		}
 
-		program.program_number = program_number;
-		program.virtual_major = virtual_major;
-		program.virtual_minor = virtual_minor;
+		program.program_number = (uint16_t)program_number;
+		program.virtual_major = (uint16_t)virtual_major;
+		program.virtual_minor = (uint16_t)virtual_minor;
 
 		channelscan_extract_name(&program, line);
 
@@ -342,28 +348,28 @@ int detectPrograms( struct hdhomerun_device_t* device, struct hdhomerun_channels
 			program.type = HDHOMERUN_CHANNELSCAN_PROGRAM_ENCRYPTED;
 		} else if (strstr(line, "(no data)")) {
 			program.type = HDHOMERUN_CHANNELSCAN_PROGRAM_NODATA;
-			*pincomplete = TRUE;
+			*pincomplete = true;
 		} else {
 			program.type = HDHOMERUN_CHANNELSCAN_PROGRAM_NORMAL;
 			if ((program.virtual_major == 0) || (program.name[0] == 0)) {
-				*pincomplete = TRUE;
+				*pincomplete = true;
 			}
 		}
 
 		if (memcmp(&result->programs[program_count], &program, sizeof(program)) != 0) {
 			memcpy(&result->programs[program_count], &program, sizeof(program));
-			*pchanged = TRUE;
+			*pchanged = true;
 		}
 
 		program_count++;
 	}
 
 	if (program_count == 0) {
-		*pincomplete = TRUE;
+		*pincomplete = true;
 	}
 	if (result->program_count != program_count) {
 		result->program_count = program_count;
-		*pchanged = TRUE;
+		*pchanged = true;
 	}
 
 	return 1;
@@ -429,7 +435,7 @@ JNIEXPORT jint JNICALL Java_com_zaren_HdhomerunSignalMeterLib_data_HdhomerunDevi
 
          while (1) 
          {
-            bool_t changed, incomplete;
+            bool changed, incomplete;
             retVal = detectPrograms(device, &result, &changed, &incomplete);
             if (retVal <= 0) 
             {
