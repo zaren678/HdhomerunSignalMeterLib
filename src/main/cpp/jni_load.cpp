@@ -1,7 +1,10 @@
 #include <jni.h>
+#include "discover/discover_jni.hpp"
+
 extern "C" {
 #include "logger.h"
 }
+
 
 JavaVM *gJavaVM;
 
@@ -17,6 +20,7 @@ jint JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
    }
    //hClass instance caching 12bi
    //hNative function registration 13i
+    discover::registerNatives(env);
    
    setLoggerVM( gJavaVM);
    

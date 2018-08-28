@@ -19,6 +19,7 @@ add_library( # Specifies the name of the library.
              # Provides a relative path to your source file(s).
              src/main/cpp/logger.c
              src/main/cpp/jni_load.cpp
+             src/main/cpp/discover/discover_jni.cpp
              src/main/cpp/legacy/hdhomerun_device_jni.c
              src/main/cpp/libhdhomerun/hdhomerun_channels.c
              src/main/cpp/libhdhomerun/hdhomerun_channelscan.c
