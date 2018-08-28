@@ -1,4 +1,4 @@
-#include "hdhomerun_os.h"
+#include "libhdhomerun/hdhomerun_os.h"
 #include "logger.h"
 
 #define MAX_BUFFER 1024

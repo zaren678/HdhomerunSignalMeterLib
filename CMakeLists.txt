@@ -17,19 +17,23 @@ add_library( # Specifies the name of the library.
              SHARED
 
              # Provides a relative path to your source file(s).
-             src/main/cpp/hdhomerun_signalMeter.c
-             src/main/cpp/hdhomerun_channels.c
-             src/main/cpp/hdhomerun_channelscan.c
-             src/main/cpp/hdhomerun_control.c
-             src/main/cpp/hdhomerun_debug.c
-             src/main/cpp/hdhomerun_device.c
-             src/main/cpp/hdhomerun_device_selector.c
-             src/main/cpp/hdhomerun_discover.c
-             src/main/cpp/hdhomerun_os_posix.c
-             src/main/cpp/hdhomerun_pkt.c
-             src/main/cpp/hdhomerun_sock_posix.c
-             src/main/cpp/hdhomerun_video.c
-             src/main/cpp/logger.c)
+             src/main/cpp/logger.c
+             src/main/cpp/jni_load.cpp
+             src/main/cpp/legacy/hdhomerun_device_jni.c
+             src/main/cpp/libhdhomerun/hdhomerun_channels.c
+             src/main/cpp/libhdhomerun/hdhomerun_channelscan.c
+             src/main/cpp/libhdhomerun/hdhomerun_control.c
+             src/main/cpp/libhdhomerun/hdhomerun_debug.c
+             src/main/cpp/libhdhomerun/hdhomerun_device.c
+             src/main/cpp/libhdhomerun/hdhomerun_device_selector.c
+             src/main/cpp/libhdhomerun/hdhomerun_discover.c
+             src/main/cpp/libhdhomerun/hdhomerun_os_posix.c
+             src/main/cpp/libhdhomerun/hdhomerun_pkt.c
+             src/main/cpp/libhdhomerun/hdhomerun_sock_posix.c
+             src/main/cpp/libhdhomerun/hdhomerun_video.c
+             )
+
+target_include_directories( hdhomerun PRIVATE src/main/cpp )
 
 find_library( # Defines the name of the path variable that stores the
               # location of the NDK library.

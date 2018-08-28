@@ -28,7 +28,7 @@
 #include "hdhomerun_video.h"
 #include "hdhomerun_channels.h"
 #include "hdhomerun_channelscan.h"
-#include "hdhomerun_device.h"
+#include "hdhomerun_device_jni.h"
 #include "hdhomerun_device_selector.h"
 
 #include <jni.h>
